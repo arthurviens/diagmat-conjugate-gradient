@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <iomanip>
 #include <thread>         // std::this_thread::sleep_for

@@ -7,51 +7,12 @@
 #include <vector>
 #include "Eigen/Dense"
 #include "DummyDistributedVector.hpp"
+#include "DistributedDiagonalMatrix.hpp"
 /**
  * @todo write docs
  */
 static bool debug = false;
 
-
-// This function is used to simulate a big network latency in order to be able to
-// see the benefit of communication avoiding with a small number of cores
-
-class DistributedDiagonalMatrix
-{
-public: /* should be private:*/
-    int _local_sz;
-    int _rank;
-    int _comm_sz;
-    MPI_Comm* _comm;
-
-    void _start_of_binary_op(const DummyDistributedVector& other)
-    {
-        assert(data.rows() == other.rows());
-    }
-
-
-public:
-    Eigen::VectorXd data;
-
-    DistributedDiagonalMatrix(MPI_Comm& comm, int local_sz)
-    {
-        _comm = &comm;
-        MPI_Comm_rank(*_comm, &_rank);
-        MPI_Comm_size(*_comm, &_comm_sz);
-        _local_sz = local_sz;
-        data.resize(_local_sz); data.setZero();
-    }
-
-    void inplaceProduct(DummyDistributedVector& other) const
-    {
-        other.data.cwiseProduct(data);
-    }
-
-    void product(DummyDistributedVector& out, const DummyDistributedVector & in) const
-    {
-        out.data = data.asDiagonal() * in.data;
-    }
-};
 
 DummyDistributedVector CG(
     int rank,
