@@ -1,0 +1,46 @@
+#!/bin/bash
+
+### nombre de cores et duree max du job
+##OAR -l core=8
+#OAR -l core=20, walltime=00:00:30
+
+#OAR -p nbcores='20'
+### nodes reserve pour le TP
+##OAR -p host='n-in27' or host='n_in28' or host='n-in29' or host='n-in30' or host='n-in31' or host='n-in35' or host='n-in36' or host='n-in37' or host='n-in39' or host='n-in40'
+#OAR -n tp1
+#OAR -O %jobid%.log
+#OAR -E %jobid%.log
+
+### exemple  par oar
+### usage1 : oarsub -S ./tp1.oar
+### usage2 : oarsub -l core=120 -S ./tp1.oar
+
+module load gcc9.2
+module load openmpi3.0.1-gcc7.3.0
+
+# Parameter for the study
+LOCAL_SZ=1000
+REP=10
+
+# For debugging, OAR looks really uncomfortable ... �
+# env
+# cat $OAR_NODE_FILE
+# cat $OAR_RESOURCE_PROPERTIES_FILE
+
+echo "Start computation"
+date
+# Get the number of MPI tasks
+CORES=$(cat $OAR_NODE_FILE | wc -l)
+echo "Execution on $CORES cores"
+
+HOSTS=$(cat $OAR_NODE_FILE) ;
+OAR_HOSTS=$(echo $HOSTS | sed "s/ /,/g");
+
+MPIRUN="$MPI_HOME/bin/mpirun -n $CORES -host $OAR_HOSTS $MPI_PARAM"
+
+#$MPI_HOME/bin/mpirun -n $CORES -host $OAR_HOSTS $MPI_PARAM tp.out -r $REP -sz $LOCAL_SZ -solver 0
+$MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 0
+$MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 1
+$MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 2
+
+echo "End computation"
