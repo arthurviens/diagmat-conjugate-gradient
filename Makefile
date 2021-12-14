@@ -53,10 +53,10 @@ $(BINDIR)%.o : $(SRCDIR)%.cpp $(HEAD) | $(BINDIR)
 #--------------------------------------------------------
 $(PROG) : $(OBJ)
 	@module load gcc9.2
-	@module load openmpi3.0.1-gcc7.3.0  
-	$(CC) $^ -o $@
+	@module load openmpi3.0.1-gcc7.3.0
+	$(CC) $^ -o $@.out
 	@echo
-	@echo Entrez ./$@ pour exécuter le programme.
+	@echo Entrez ./$@.out pour exécuter le programme.
 
 # Règle pour effacer les fichiers temporaires
 #--------------------------------------------------------
