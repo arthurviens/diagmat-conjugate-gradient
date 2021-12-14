@@ -2,8 +2,6 @@ bin/*
 
 logs/*
 
-eigen-3.3.7/*
-
 tp.out
 
 tp1.tar.gz
