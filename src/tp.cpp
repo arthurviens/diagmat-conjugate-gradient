@@ -7,7 +7,9 @@
 #include <vector>
 #include "Eigen/Dense"
 #include "DummyDistributedVector.hpp"
+#include "DistributedMatrix.hpp"
 #include "DistributedDiagonalMatrix.hpp"
+#include "DistributedBlockDiagonalMatrix.hpp"
 #include "conjGrad.hpp"
 /**
  * @todo write docs

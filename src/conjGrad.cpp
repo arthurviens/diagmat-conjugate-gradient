@@ -40,9 +40,9 @@ DummyDistributedVector CG(
         w.transposeProduct(delta, q);
         alpha = gamma/delta;
 
-	if(debug && rank==0) {
-	  std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
-	}
+      	if(debug && rank==0) {
+      	  std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
+      	}
 
         x.axpy(alpha, w);
         r.axpy(-alpha, q);
@@ -53,11 +53,11 @@ DummyDistributedVector CG(
         w +=r;
 
         iter++;
-	if((rank==0) && (iter%10 == 0)) {
-	  std::cout<< std::setfill(' ') << std::setw(8);
-	  std::cout<< iter << "/" << maxiter << "        ";
-	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
-	}
+      	if((rank==0) && (iter%10 == 0)) {
+      	  std::cout<< std::setfill(' ') << std::setw(8);
+      	  std::cout<< iter << "/" << maxiter << "        ";
+      	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
+      	}
 
     } while ((sqrt(nr/nr0)>rtol) && (iter<maxiter));
 
@@ -102,9 +102,9 @@ DummyDistributedVector ImprovedCG(
       r.doubleTransposeProduct(w, gamma, delta, r, q);
       alpha = gamma/delta;
 
-if(debug && rank==0) {
-  std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
-}
+      if(debug && rank==0) {
+        std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
+      }
 
       x.axpy(alpha, w);
       r.axpy(-alpha, q);
@@ -115,11 +115,11 @@ if(debug && rank==0) {
       w +=r;
 
       iter++;
-if(debug && (rank==0) && (iter%10 == 0)) {
-  std::cout<< std::setfill(' ') << std::setw(8);
-  std::cout<< iter << "/" << maxiter << "        ";
-  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
-}
+      if(debug && (rank==0) && (iter%10 == 0)) {
+        std::cout<< std::setfill(' ') << std::setw(8);
+        std::cout<< iter << "/" << maxiter << "        ";
+        std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
+      }
 
   } while ((sqrt(nr/nr0)>rtol) && (iter<maxiter));
 
