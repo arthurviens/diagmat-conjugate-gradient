@@ -9,7 +9,6 @@
 
 
 
-
 DistributedMatrix::DistributedMatrix(MPI_Comm& comm, int local_sz)
 {
     _comm = &comm;

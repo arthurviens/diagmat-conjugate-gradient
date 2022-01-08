@@ -8,8 +8,8 @@
 #include "Eigen/Dense"
 #include "Eigen/Core"
 
-using namespace Eigen;
-
-
-template <typename Derived>
-void print_size(const Eigen::EigenBase<Derived>& b);
+namespace covid
+{
+  template <typename Derived>
+  void print_matsize(const Eigen::EigenBase<Derived>& b);
+}

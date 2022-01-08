@@ -18,12 +18,14 @@
  */
 extern bool debug;
 
+
+
 int main()
 {
     Eigen::Vector3f v;
-    print_size(v);
+    covid::print_matsize(v);
     // v.asDiagonal() returns a 3x3 diagonal matrix pseudo-expression
-    print_size(v.asDiagonal());
+    covid::print_matsize(v.asDiagonal());
 }
 
 /*
