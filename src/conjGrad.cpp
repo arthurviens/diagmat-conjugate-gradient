@@ -223,3 +223,26 @@ DummyDistributedVector ChronopoulosGearCG(
 
   return x;
 }
+
+DummyDistributedVector Preconditionned_ChronopoulosGearCG(
+    int rank,
+    const DistributedDiagonalMatrix &A,
+    const DummyDistributedVector &b,
+    double rtol=1e-6, int maxiter=1000)
+
+    {
+      // Allocation
+      double alpha;
+      double nr, nr0;
+      DummyDistributedVector r(b);
+      DummyDistributedVector x(b); x.data.setZero();
+      DummyDistributedVector q(r); q.data.setZero();
+      DummyDistributedVector v(r); v.data.setZero();
+      DummyDistributedVector u(r); u.data.setZero();
+      DummyDistributedVector z(r); z.data.setZero();
+      DummyDistributedVector w(r); w.data.setZero();
+
+
+      // Initialization
+      int iter=0;
+      r.transposeProduct(nr0, r);
