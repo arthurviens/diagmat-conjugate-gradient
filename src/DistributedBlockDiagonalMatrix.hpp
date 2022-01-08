@@ -15,11 +15,10 @@
 class DistributedBlockDiagonalMatrix : public DistributedMatrix{
 public:
   unsigned int m_blocksize;
-  unsigned int m_rows;
-  unsigned int m_cols;
+  unsigned int m_nbblocks;
 
 public:
-    DistributedBlockDiagonalMatrix(MPI_Comm& comm, int local_sz);
+    DistributedBlockDiagonalMatrix(MPI_Comm& comm,  int nb_blocks, int block_size);
     void inplaceProduct(DummyDistributedVector& other) const override;
     void product(DummyDistributedVector& out, const DummyDistributedVector & in) const override;
     void print(std::string display_type) const override;

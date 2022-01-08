@@ -30,6 +30,7 @@ int main (int argc, char *argv[])
     int maxiter = 1000;
     double rtol = 1.0e-6;
     int rep=1;
+    int block_size = 2;
 
     // Initialize MPI
 
@@ -127,17 +128,20 @@ int main (int argc, char *argv[])
        std::cout << "Solver id: " << solverID << std::endl;
     }
 
-
     // Setup of the matrix and rhs
     DistributedDiagonalMatrix A(comm, local_sz);
     A.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
+    A.print("diagonal");
+    DistributedBlockDiagonalMatrix block_A(comm, (local_sz / block_size), block_size);
+    block_A.data.setLinSpaced(local_sz * 2, 1.0, (double) local_sz);
+    block_A.print("regular");
+    
     // A.data.array().pow(k);
     DummyDistributedVector b(comm, local_sz);
     b.data.setOnes();
     // b.data.setRandom();
 
     DummyDistributedVector x(comm, local_sz);
-
 
     /*
     std::vector<Eigen::Matrix<double,2,2>, Eigen::aligned_allocator<Eigen::Matrix<double,2,2> > > block_vec;
