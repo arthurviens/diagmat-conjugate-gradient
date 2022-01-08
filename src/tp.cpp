@@ -20,15 +20,7 @@ extern bool debug;
 
 
 
-int main()
-{
-    Eigen::Vector3f v;
-    covid::print_matsize(v);
-    // v.asDiagonal() returns a 3x3 diagonal matrix pseudo-expression
-    covid::print_matsize(v.asDiagonal());
-}
 
-/*
 int main (int argc, char *argv[])
 {
     int rank, comm_sz;
@@ -144,10 +136,9 @@ int main (int argc, char *argv[])
     // b.data.setRandom();
 
     DummyDistributedVector x(comm, local_sz);
-    Eigen::Matrix3d m1;
-    m1 << 1.111111, 2, 3.33333, 4, 5, 6, 7, 8.888888, 9;
 
-    print_size(m1);
+    A.print("diagonal");
+    int cgt=666;
 
     double starttime, endtime;
     starttime = MPI_Wtime();
@@ -180,4 +171,4 @@ int main (int argc, char *argv[])
     MPI_Finalize();
 
     return 0;
-}*/
+}

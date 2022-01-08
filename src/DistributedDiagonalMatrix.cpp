@@ -27,31 +27,15 @@ void DistributedDiagonalMatrix::product(DummyDistributedVector& out, const Dummy
     out.data = data.asDiagonal() * in.data;
 }
 
-void DistributedDiagonalMatrix::print() const {
+void DistributedDiagonalMatrix::print(std::string display_type) const {
   std::string sep = "\n----------------------------------------\n";
 
-  //Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", ", ", "", "", " << ", ";");
   Eigen::IOFormat CleanFmt(3, 0, ", ", "\n", "[", "]");
-  //Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "]");
-  //Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
-
 
   std::cout << "Matrix of size " << data.size() << std::endl;
-  std::cout << data.format(CleanFmt) << sep;
+  if (display_type == "diagonal") {
+    std::cout << Eigen::MatrixXd(data.asDiagonal()).format(CleanFmt) << sep;
+  } else {
+    std::cout << data << sep;
+  }
 }
-
-/*
-template <typename Derived>
-void print_mat(Eigen::EigenBase<Derived>& A) {
-  std::cout << "in print_mat" << std::endl;
-  std::string sep = "\n----------------------------------------\n";
-
-  //Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", ", ", "", "", " << ", ";");
-  Eigen::IOFormat CleanFmt(3, 0, ", ", "\n", "[", "]");
-  //Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "]");
-  //Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
-
-
-  std::cout << "Matrix of size " << A.size() << std::endl;
-  std::cout << A.format(CleanFmt) << sep;
-}*/

@@ -26,5 +26,5 @@ public:
     virtual void inplaceProduct(DummyDistributedVector& other) const = 0;
     virtual void product(DummyDistributedVector& out,
       const DummyDistributedVector & in) const = 0;
-    virtual void print() const = 0;
+    virtual void print(std::string display_type) const = 0;
 };

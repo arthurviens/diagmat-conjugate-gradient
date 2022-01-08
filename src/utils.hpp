@@ -8,8 +8,21 @@
 #include "Eigen/Dense"
 #include "Eigen/Core"
 
-namespace covid
+namespace disp
 {
   template <typename Derived>
-  void print_matsize(const Eigen::EigenBase<Derived>& b);
+  void print_matsize(const Eigen::EigenBase<Derived>& b) {
+      std::cout << "size (rows, cols): " << b.size() << " (" << b.rows()
+                << ", " << b.cols() << ")" << std::endl;
+  }
+
+  template <typename Derived>
+  void print_mat(Eigen::MatrixBase<Derived>& A) {
+    std::string sep = "\n----------------------------------------\n";
+
+    Eigen::IOFormat CleanFmt(3, 0, ", ", "\n", "[", "]");
+
+    std::cout << sep << "Matrix of size " << A.size() << std::endl;
+    std::cout << A.format(CleanFmt) << sep;
+  }
 }
