@@ -16,6 +16,8 @@ DummyDistributedVector CG(
     double rtol, int maxiter)
 {
     // Allocation
+    //std::cout << "Début CG, printing A" << std::endl;
+    //A.print();
     double alpha, gamma, delta;
     double nr, nr0;
     DummyDistributedVector r(b);
@@ -36,6 +38,8 @@ DummyDistributedVector CG(
     // CG-Loop
     do {
         A.product(q, w);
+        //std::cout << "q = " << std::endl;
+        //q.print();
         r.transposeProduct(gamma, r);
         w.transposeProduct(delta, q);
         alpha = gamma/delta;

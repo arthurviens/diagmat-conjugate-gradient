@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include <vector>
 #include "Eigen/Dense"
+#include "Eigen/Core"
 #include "DummyDistributedVector.hpp"
 
 
@@ -25,4 +26,5 @@ public:
     virtual void inplaceProduct(DummyDistributedVector& other) const = 0;
     virtual void product(DummyDistributedVector& out,
       const DummyDistributedVector & in) const = 0;
+    virtual void print() const = 0;
 };

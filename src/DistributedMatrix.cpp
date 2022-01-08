@@ -3,6 +3,7 @@
 #include <mpi.h>
 #include <vector>
 #include "Eigen/Dense"
+#include "Eigen/Core"
 #include "DistributedMatrix.hpp"
 #include "DummyDistributedVector.hpp"
 
@@ -17,7 +18,6 @@ DistributedMatrix::DistributedMatrix(MPI_Comm& comm, int local_sz)
     _local_sz = local_sz;
     data.resize(_local_sz); data.setZero();
 }
-
 
 
 void DistributedMatrix::_start_of_binary_op(const DummyDistributedVector& other)

@@ -6,16 +6,27 @@
 #include <mpi.h>
 #include <vector>
 #include "Eigen/Dense"
+#include "Eigen/Core"
 #include "DummyDistributedVector.hpp"
 #include "DistributedMatrix.hpp"
 #include "DistributedDiagonalMatrix.hpp"
 #include "DistributedBlockDiagonalMatrix.hpp"
 #include "conjGrad.hpp"
+#include "utils.hpp"
 /**
  * @todo write docs
  */
 extern bool debug;
 
+int main()
+{
+    Eigen::Vector3f v;
+    print_size(v);
+    // v.asDiagonal() returns a 3x3 diagonal matrix pseudo-expression
+    print_size(v.asDiagonal());
+}
+
+/*
 int main (int argc, char *argv[])
 {
     int rank, comm_sz;
@@ -25,7 +36,8 @@ int main (int argc, char *argv[])
     double rtol = 1.0e-6;
     int rep=1;
 
-    /* Initialize MPI */
+    // Initialize MPI
+
     MPI_Init(&argc, &argv);
     MPI_Comm comm;
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);
@@ -39,7 +51,7 @@ int main (int argc, char *argv[])
        return(0);
     }
 
-    /* Parse command line */
+    // Parse command line
     {
        int arg_index = 0;
        int print_usage = 0;
@@ -130,6 +142,10 @@ int main (int argc, char *argv[])
     // b.data.setRandom();
 
     DummyDistributedVector x(comm, local_sz);
+    Eigen::Matrix3d m1;
+    m1 << 1.111111, 2, 3.33333, 4, 5, 6, 7, 8.888888, 9;
+
+    print_size(m1);
 
     double starttime, endtime;
     starttime = MPI_Wtime();
@@ -158,6 +174,8 @@ int main (int argc, char *argv[])
     // if(rank==0) std::cout << x.data << std::endl;
 
     if(rank == 0) std::cout<<"Finish computation"<<std::endl;
+
     MPI_Finalize();
+
     return 0;
-}
+}*/
