@@ -12,10 +12,6 @@
 DistributedDiagonalMatrix::DistributedDiagonalMatrix(MPI_Comm& comm, int local_sz)
   : DistributedMatrix(comm, local_sz) {}
 
-/*
-Eigen::DiagonalMatrix DistributedDiagonalMatrix::toDiagonal() {
-  return data.asDiagonal();
-}*/
 
 void DistributedDiagonalMatrix::inplaceProduct(DummyDistributedVector& other) const
 {

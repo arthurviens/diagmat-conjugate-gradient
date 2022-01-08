@@ -11,11 +11,11 @@
 
 DistributedMatrix::DistributedMatrix(MPI_Comm& comm, int local_sz)
 {
-    _comm = &comm;
-    MPI_Comm_rank(*_comm, &_rank);
-    MPI_Comm_size(*_comm, &_comm_sz);
-    _local_sz = local_sz;
-    data.resize(_local_sz); data.setZero();
+    m_comm = &comm;
+    MPI_Comm_rank(*m_comm, &m_rank);
+    MPI_Comm_size(*m_comm, &m_comm_sz);
+    m_local_sz = local_sz;
+    data.resize(m_local_sz); data.setZero();
 }
 
 

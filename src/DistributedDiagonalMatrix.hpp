@@ -12,7 +12,6 @@
 class DistributedDiagonalMatrix : public DistributedMatrix{
 public:
     DistributedDiagonalMatrix(MPI_Comm& comm, int local_sz);
-    //auto toDiagonal();
     void inplaceProduct(DummyDistributedVector& other) const override;
     void product(DummyDistributedVector& out, const DummyDistributedVector & in) const override;
     void print(std::string display_type) const override;

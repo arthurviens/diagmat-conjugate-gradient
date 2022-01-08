@@ -11,10 +11,10 @@
 class DistributedMatrix
 {
 public: /* should be private:*/
-    int _local_sz;
-    int _rank;
-    int _comm_sz;
-    MPI_Comm* _comm;
+    int m_local_sz;
+    int m_rank;
+    int m_comm_sz;
+    MPI_Comm* m_comm;
 
     void _start_of_binary_op(const DummyDistributedVector& other);
 

@@ -7,6 +7,7 @@
 #include <vector>
 #include "Eigen/Dense"
 #include "Eigen/Core"
+#include "Eigen/StdVector"
 #include "DummyDistributedVector.hpp"
 #include "DistributedMatrix.hpp"
 #include "DistributedDiagonalMatrix.hpp"
@@ -24,7 +25,7 @@ extern bool debug;
 int main (int argc, char *argv[])
 {
     int rank, comm_sz;
-    int local_sz = 10;
+    int local_sz = 8;
     int solverID = 0;
     int maxiter = 1000;
     double rtol = 1.0e-6;
@@ -137,8 +138,21 @@ int main (int argc, char *argv[])
 
     DummyDistributedVector x(comm, local_sz);
 
-    A.print("diagonal");
-    int cgt=666;
+
+    /*
+    std::vector<Eigen::Matrix<double,2,2>, Eigen::aligned_allocator<Eigen::Matrix<double,2,2> > > block_vec;
+
+    Eigen::MatrixXd block_A{A.data.asDiagonal()};
+    std::cout << "block_A : \n" << block_A << std::endl;
+    for (int i = 0; i < block_A.rows() / 2; ++i) {
+        block_vec.push_back(block_A.block(2 * i, 2 * i, 2, 2));
+    }
+
+    for (unsigned int i = 0; i < block_vec.size(); ++i) {
+      std::cout << "Block number " << i << " : " << "\n";
+      std::cout << block_vec[i] << "\n";
+    }*/
+
 
     double starttime, endtime;
     starttime = MPI_Wtime();
