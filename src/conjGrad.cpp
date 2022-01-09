@@ -24,7 +24,7 @@ DummyDistributedVector CG(
 
     // Initialization
     int iter=0;
-    r.transposeProduct(nr0, r);
+    r.transposeProduct(nr0, r); //
     nr = nr0;
     DummyDistributedVector w(r);
     if(rank==0) {
@@ -227,6 +227,7 @@ DummyDistributedVector ChronopoulosGearCG(
 DummyDistributedVector Preconditionned_ChronopoulosGearCG(
     int rank,
     const DistributedDiagonalMatrix &A,
+    const DistributedDiagonalMatrix &M,
     const DummyDistributedVector &b,
     double rtol, int maxiter)
 
@@ -241,16 +242,19 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       DummyDistributedVector u(r); u.data.setZero();
       DummyDistributedVector z(r); z.data.setZero();
       DummyDistributedVector w(r); w.data.setZero();
+      DummyDistributedVector p(r); p.data.setZero();
+      DummyDistributedVector s(r); s.data.setZero();
 
 
       // Initialization
       int iter=0;
-      r.transposeProduct(nr0, r); //u0=M^(-1) r0
-      A.product(w,r); // w0 = A U0
-      alpha=r.ltransposeProduct(r)/v.ltransposeProduct(r); // alpha0:=(r0,u0)/(w0,u0)
-      beta=0;
-      gamma=r.ltransposeProduct(r); // gamma0 = (r0,u0)
+      M.product(u, r); //u0=M^(-1) r0
 
+      A.product(w,u); // w0 = A U0
+      alpha=r.ltransposeProduct(u)/w.ltransposeProduct(u); // alpha0:=(r0,u0)/(w0,u0)
+      beta=0;
+      gamma=r.ltransposeProduct(u); // gamma0 = (r0,u0)
+      prev_gamma = gamma;
       if(rank==0) {
         std::cout<<"Start Preconditionned Chronopoulos CG"<<std::endl;
         std::cout<<"    Initial residual: "<< sqrt(nr0) <<std::endl;
@@ -260,24 +264,25 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       MPI_Request req;
       MPI_Status status;
 
+
         // CG-Loop
         std::vector<double> values(2);
       do {
 
-        values[0] = r.ltransposeProduct(r);
-        values[1] = r.ltransposeProduct(v);
-        Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A._comm), req);
-        gamma = values[0];
-        delta = values[1];
+        //values[0] = r.ltransposeProduct(r);
+        //values[1] = r.ltransposeProduct(v);
+        //Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A._comm), req);
+        //gamma = values[0];
+        //delta = values[1];
 
-      w *= beta; w += u;
-      q *= beta; q += v;
-      x.axpy(alpha, w);
-      r.axpy(-alpha, q);
-      u.transposeProduct(nr, r); // ui+1 = M^-1 ri+1
-      A.product(v,r); // ligne 9
-      gamma = r.ltransposeProduct(r); //ligne 10
-      delta = v.ltransposeProduct(r); //ligne 11
+      p *= beta; p += u;
+      s *= beta; s += w;
+      x.axpy(alpha, p);
+      r.axpy(-alpha, s);
+      M.product(u, r); // ui+1 = M^-1 ri+1
+      A.product(w,u); // ligne 9
+      gamma = r.ltransposeProduct(u); //ligne 10
+      delta = w.ltransposeProduct(u); //ligne 11
       beta = gamma/prev_gamma; //logne 12
       prev_gamma = gamma;
       alpha = gamma /( delta - beta * gamma / alpha);

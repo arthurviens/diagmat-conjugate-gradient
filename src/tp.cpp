@@ -14,6 +14,7 @@
  */
 extern bool debug;
 
+
 int main (int argc, char *argv[])
 {
     int rank, comm_sz;
@@ -122,6 +123,8 @@ int main (int argc, char *argv[])
     // Setup of the matrix and rhs
     DistributedDiagonalMatrix A(comm, local_sz);
     A.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
+    DistributedDiagonalMatrix M(comm, local_sz);
+    M.data.setLinSpaced(local_sz, 1.0, 1.0);
     // A.data.array().pow(k);
     DummyDistributedVector b(comm, local_sz);
     b.data.setOnes();
@@ -136,6 +139,7 @@ int main (int argc, char *argv[])
     	if(solverID == 0) x = CG(rank, A, b, rtol, maxiter);
     	else if (solverID == 1) x = ImprovedCG(rank, A, b, rtol, maxiter);
     	else if (solverID == 2) x = ChronopoulosGearCG(rank, A, b, rtol, maxiter);
+      else if (solverID == 3) x = Preconditionned_ChronopoulosGearCG(rank, A, M, b, rtol, maxiter);
     	else {
     	  printf("Unknown solver\n");
     	  return(1);
