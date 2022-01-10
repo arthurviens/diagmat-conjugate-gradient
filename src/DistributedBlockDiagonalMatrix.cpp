@@ -46,6 +46,22 @@ Eigen::MatrixXd DistributedBlockDiagonalMatrix::plainMatrix() const {
   return fullMatrix;
 }
 
+// [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]
+
+void DistributedBlockDiagonalMatrix::makeDataSymetric() {
+  int blocksize_squared = m_blocksize * m_blocksize;
+  data(0) = data[blocksize_squared];
+  for (unsigned int i = 0; i < (m_nbblocks); ++i) {
+    for (unsigned int j = 0; j < m_blocksize; ++j) {
+      for (unsigned int k = 0; k < m_blocksize; ++k) {
+        if ((j > k)) {
+          data[i * blocksize_squared + j * m_blocksize + k] = data[i * blocksize_squared + k * m_blocksize + j];
+        }
+      }
+    }
+  }
+}
+
 
 void DistributedBlockDiagonalMatrix::print(std::string display_type) const {
   std::string sep = "\n----------------------------------------\n";

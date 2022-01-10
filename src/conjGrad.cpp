@@ -23,12 +23,12 @@ DummyDistributedVector CG(
     DummyDistributedVector r(b);
     DummyDistributedVector x(b); x.data.setZero();
     DummyDistributedVector q(r); q.data.setZero();
+    DummyDistributedVector w(r);
 
     // Initialization
     int iter=0;
     r.transposeProduct(nr0, r);
     nr = nr0;
-    DummyDistributedVector w(r);
     if(rank==0) {
       std::cout<<"Start CG"<<std::endl;
       std::cout<<"    Initial residual: "<< sqrt(nr0) <<std::endl;
@@ -54,10 +54,10 @@ DummyDistributedVector CG(
 
         r.transposeProduct(nr, r);
         w *= (nr/gamma);
-        w +=r;
+        w += r;
 
         iter++;
-      	if((rank==0) && (iter%10 == 0)) {
+      	if((rank==0)) {
       	  std::cout<< std::setfill(' ') << std::setw(8);
       	  std::cout<< iter << "/" << maxiter << "        ";
       	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;

@@ -24,6 +24,7 @@ public:
     void product(DummyDistributedVector& out, const DummyDistributedVector & in) const override;
     void print(std::string display_type) const override;
     Eigen::MatrixXd plainMatrix() const ;
+    void makeDataSymetric();
 };
 
 template <typename Derived>

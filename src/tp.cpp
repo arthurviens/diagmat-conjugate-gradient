@@ -136,15 +136,23 @@ int main (int argc, char *argv[])
     DistributedBlockDiagonalMatrix block_B(comm, (local_sz / block_size), block_size);
     DistributedBlockDiagonalMatrix* block_A = &block_B;
     block_A->data.setLinSpaced(local_sz * 2, 1.0, (double) local_sz * 2);
+    block_A->makeDataSymetric();
+    /*int p = 0;
+    for (int i = 0; i < block_A->m_nbblocks * block_A->m_blocksize * block_A->m_blocksize; ++i) {
+        if (1 - ((i == 0) | (i==3) | (i==4) | (i==7) | (i==8) | (i==11) | (i==12) | (i==15))) {
+          block_A->data(i) = 0;
+        }
+    }*/
+
 
     // A.data.array().pow(k);
     block_A->print("regular");
 
 
     DummyDistributedVector b(comm, local_sz);
+    DummyDistributedVector c(b);
 
     b.data.setOnes();
-
     // b.data.setRandom();
 
     DummyDistributedVector x(comm, local_sz);
@@ -155,9 +163,9 @@ int main (int argc, char *argv[])
     starttime = MPI_Wtime();
 
     for(int irep=0; irep<rep; irep++) {
-    	if(solverID == 0) x = CG(rank, A, b, rtol, maxiter);
-    	else if (solverID == 1) x = ImprovedCG(rank, A, b, rtol, maxiter);
-    	else if (solverID == 2) x = ChronopoulosGearCG(rank, A, b, rtol, maxiter);
+    	if(solverID == 0) x = CG(rank, block_A, b, rtol, maxiter);
+    	else if (solverID == 1) x = ImprovedCG(rank, block_A, b, rtol, maxiter);
+    	else if (solverID == 2) x = ChronopoulosGearCG(rank, block_A, b, rtol, maxiter);
     	else {
     	  printf("Unknown solver\n");
     	  return(1);
