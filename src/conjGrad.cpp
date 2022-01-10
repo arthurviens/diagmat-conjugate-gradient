@@ -176,7 +176,7 @@ DummyDistributedVector ChronopoulosGearCG(
     //A.product(q, w);
     values[0] = r.ltransposeProduct(r);
     values[1] = r.ltransposeProduct(v);
-    Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A._comm), req);
+    Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A.m_comm), req);
     gamma = values[0];
     delta = values[1];
 

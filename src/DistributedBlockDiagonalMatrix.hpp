@@ -19,9 +19,11 @@ public:
 
 public:
     DistributedBlockDiagonalMatrix(MPI_Comm& comm,  int nb_blocks, int block_size);
+    void initProductData();
     void inplaceProduct(DummyDistributedVector& other) const override;
     void product(DummyDistributedVector& out, const DummyDistributedVector & in) const override;
     void print(std::string display_type) const override;
+    Eigen::MatrixXd plainMatrix() const ;
 };
 
 template <typename Derived>

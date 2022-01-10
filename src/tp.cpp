@@ -131,14 +131,20 @@ int main (int argc, char *argv[])
     // Setup of the matrix and rhs
     DistributedDiagonalMatrix A(comm, local_sz);
     A.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
-    A.print("diagonal");
+    //A.print("diagonal");
     DistributedBlockDiagonalMatrix block_A(comm, (local_sz / block_size), block_size);
-    block_A.data.setLinSpaced(local_sz * 2, 1.0, (double) local_sz);
-    block_A.print("regular");
-    
+    block_A.data.setLinSpaced(local_sz * 2, 1.0, (double) local_sz * 2);
+
     // A.data.array().pow(k);
+    block_A.print("regular");
+
+
     DummyDistributedVector b(comm, local_sz);
+    // DummyDistributedVector c(b);
     b.data.setOnes();
+    //block_A.product(c, b);
+    b.print();
+    //c.print();
     // b.data.setRandom();
 
     DummyDistributedVector x(comm, local_sz);
