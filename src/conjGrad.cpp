@@ -249,6 +249,8 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       // Initialization
       int iter=0;
       M.product(u, r); //u0=M^(-1) r0
+      r.transposeProduct(nr0, r);
+      nr = nr0;
 
       A.product(w,u); // w0 = A U0
       alpha=r.ltransposeProduct(u)/w.ltransposeProduct(u); // alpha0:=(r0,u0)/(w0,u0)
@@ -287,7 +289,7 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       prev_gamma = gamma;
       alpha = gamma /( delta - beta * gamma / alpha);
 
-
+      r.transposeProduct(nr, r);
       iter++;
 
 
