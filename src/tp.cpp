@@ -129,39 +129,26 @@ int main (int argc, char *argv[])
     }
 
     // Setup of the matrix and rhs
-    DistributedDiagonalMatrix A(comm, local_sz);
-    A.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
+    DistributedDiagonalMatrix B(comm, local_sz);
+    DistributedDiagonalMatrix* A = &B;
+    (*A).data.setLinSpaced(local_sz, 1.0, (double) local_sz);
     //A.print("diagonal");
-    DistributedBlockDiagonalMatrix block_A(comm, (local_sz / block_size), block_size);
-    block_A.data.setLinSpaced(local_sz * 2, 1.0, (double) local_sz * 2);
+    DistributedBlockDiagonalMatrix block_B(comm, (local_sz / block_size), block_size);
+    DistributedBlockDiagonalMatrix* block_A = &block_B;
+    block_A->data.setLinSpaced(local_sz * 2, 1.0, (double) local_sz * 2);
 
     // A.data.array().pow(k);
-    block_A.print("regular");
+    block_A->print("regular");
 
 
     DummyDistributedVector b(comm, local_sz);
-    // DummyDistributedVector c(b);
+
     b.data.setOnes();
-    //block_A.product(c, b);
-    b.print();
-    //c.print();
+
     // b.data.setRandom();
 
     DummyDistributedVector x(comm, local_sz);
 
-    /*
-    std::vector<Eigen::Matrix<double,2,2>, Eigen::aligned_allocator<Eigen::Matrix<double,2,2> > > block_vec;
-
-    Eigen::MatrixXd block_A{A.data.asDiagonal()};
-    std::cout << "block_A : \n" << block_A << std::endl;
-    for (int i = 0; i < block_A.rows() / 2; ++i) {
-        block_vec.push_back(block_A.block(2 * i, 2 * i, 2, 2));
-    }
-
-    for (unsigned int i = 0; i < block_vec.size(); ++i) {
-      std::cout << "Block number " << i << " : " << "\n";
-      std::cout << block_vec[i] << "\n";
-    }*/
 
 
     double starttime, endtime;
@@ -181,7 +168,7 @@ int main (int argc, char *argv[])
 
     // Just to check solution
     DummyDistributedVector tmp(x);
-    A.product(tmp, x);
+    A->product(tmp, x);
     tmp -= b;
     double nr;
     tmp.transposeProduct(nr, tmp);

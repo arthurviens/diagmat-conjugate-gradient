@@ -10,18 +10,18 @@ extern bool debug;
 
 DummyDistributedVector CG(
     int rank,
-    const DistributedDiagonalMatrix &A,
+    const DistributedMatrix *A,
     const DummyDistributedVector &b,
     double rtol=1e-6, int maxiter=1000);
 
 DummyDistributedVector ImprovedCG(
   int rank,
-  const DistributedDiagonalMatrix &A,
+  const DistributedMatrix *A,
   const DummyDistributedVector &b,
   double rtol=1e-6, int maxiter=1000);
 
 DummyDistributedVector ChronopoulosGearCG(
     int rank,
-    const DistributedDiagonalMatrix &A,
+    const DistributedMatrix *A,
     const DummyDistributedVector &b,
     double rtol=1e-6, int maxiter=1000);

@@ -11,7 +11,7 @@ bool debug = false;
 
 DummyDistributedVector CG(
     int rank,
-    const DistributedDiagonalMatrix &A,
+    const DistributedMatrix* A,
     const DummyDistributedVector &b,
     double rtol, int maxiter)
 {
@@ -37,7 +37,7 @@ DummyDistributedVector CG(
 
     // CG-Loop
     do {
-        A.product(q, w);
+        A->product(q, w);
         //std::cout << "q = " << std::endl;
         //q.print();
         r.transposeProduct(gamma, r);
@@ -78,7 +78,7 @@ DummyDistributedVector CG(
 
 DummyDistributedVector ImprovedCG(
   int rank,
-  const DistributedDiagonalMatrix &A,
+  const DistributedMatrix *A,
   const DummyDistributedVector &b,
   double rtol, int maxiter)
 {
@@ -102,7 +102,7 @@ DummyDistributedVector ImprovedCG(
 
   // CG-Loop
   do {
-      A.product(q, w);
+      A->product(q, w);
       r.doubleTransposeProduct(w, gamma, delta, r, q);
       alpha = gamma/delta;
 
@@ -141,7 +141,7 @@ DummyDistributedVector ImprovedCG(
 
 DummyDistributedVector ChronopoulosGearCG(
     int rank,
-    const DistributedDiagonalMatrix &A,
+    const DistributedMatrix *A,
     const DummyDistributedVector &b,
     double rtol, int maxiter)
 {
@@ -166,21 +166,21 @@ DummyDistributedVector ChronopoulosGearCG(
     std::cout<<"    Iteration,  Absolute residual,  Relative residual"<<std::endl;
   }
 
-  A.product(v, r);
+  A->product(v, r);
   MPI_Request req;
   MPI_Status status;
 
   // CG-Loop
   std::vector<double> values(2);
   do {
-    //A.product(q, w);
+    //A->product(q, w);
     values[0] = r.ltransposeProduct(r);
     values[1] = r.ltransposeProduct(v);
-    Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A.m_comm), req);
+    Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A->m_comm), req);
     gamma = values[0];
     delta = values[1];
 
-    A.product(u, v);
+    A->product(u, v);
 
     MPI_Wait(&req, &status);
 
