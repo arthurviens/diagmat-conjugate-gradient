@@ -18,18 +18,67 @@ DummyDistributedVector GhyselsVanrooseCG(
     )
     
 {
-  // Allocation
-  double alpha, gamma, delta, beta, prev_gamma;
-  double nr, nr0;
-  DummyDistributedVector r(b);
-  DummyDistributedVector x(b); x.data.setZero();
-  DummyDistributedVector q(r); q.data.setZero();
-  DummyDistributedVector v(r); v.data.setZero();
-  DummyDistributedVector u(r); u.data.setZero();
-  DummyDistributedVector z(r); z.data.setZero();
-  DummyDistributedVector w(r); w.data.setZero();
+    // Allocation
+    double alpha, gamma, delta, beta, prev_gamma;
+    DummyDistributedVector r(b);
+    DummyDistributedVector x(b); x.data.setZero();
+    DummyDistributedVector q(r); q.data.setZero();
+    DummyDistributedVector v(r); v.data.setZero();
+    DummyDistributedVector u(r); u.data.setZero();
+    DummyDistributedVector z(r); z.data.setZero();
+    DummyDistributedVector w(r); w.data.setZero();
+    DummyDistributedVector p(r); p.data.setZero();
+    DummyDistributedVector s(r); s.data.setZero();
+    DummyDistributedVector m(r); m.data.setZero();
+
+    // Initialization
+    int iter=0;
+    M.product(u, r);   
+    r.transposeProduct(nr0, r);
+    A.product(w,u);
+    MPI_Request req;
+    MPI_Status status;
+
+    if(rank==0) {
+       std::cout<<"Start Preconditionned Chronopoulos CG"<<std::endl;
+       std::cout<<"Initial residual: "<< sqrt(nr0) <<std::endl;
+       std::cout<<"Iteration,  Absolute residual,  Relative residual"<<std::endl;
+    }
     
-    
+    do {
+        gamma = r.ltransposeProduct(u);
+        delta = w.ltransposeProduct(u);
+        M.product(u, w);
+        A.product(n,m);
+        if (iter > 0) {
+            beta = gamma / prev_gamma;
+            alpha = gamma / (delta - beta * gamma / alpha )
+            } else {
+                beta = 0;
+                alpha = gamma / delta;
+                }
+        }
+        z *= beta; z += n;
+        q *= beta; q += m;
+        p *= beta; p += u;
+        s *= beta; s += w;
+        x.axpy(alpha, p);
+        r.axpy(-alpha, s);
+        u.axpy(-alpha, q);
+        w.axpy(-alpha, z);
+        iter++;
+
+      } while((sqrt(nr/nr0)>rtol) && (iter<maxiter));
+        if(rank==0) {
+            if( sqrt(nr/nr0) < rtol){
+                std::cout<<"Converged solution"<<std::endl;
+                }
+                else {
+                    std::cout<<"Not converged solution"<<std::endl;
+                    }
+        }
+
+      return x;
 }
 
 
