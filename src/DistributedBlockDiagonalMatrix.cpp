@@ -38,7 +38,6 @@ Eigen::MatrixXd DistributedBlockDiagonalMatrix::plainMatrix() const {
   for (unsigned int i = 0; i < (m_nbblocks); ++i) {
     for (unsigned int j = 0; j < m_blocksize; ++j) {
       for (unsigned int k = 0; k < m_blocksize; ++k) {
-        //std::cout << i << " x " << j << " x " << k << " = " << i + j + k << " : " << data[i+j+k] << std::endl;
         fullMatrix(i * m_blocksize + j, i * m_blocksize + k) = data[i * blocksize_squared + j * m_blocksize + k];
       }
     }

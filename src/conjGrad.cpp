@@ -52,22 +52,23 @@ DummyDistributedVector CG(
         r.axpy(-alpha, q);
 
 
-        r.transposeProduct(nr, r);
-        w *= (nr/gamma);
-        w += r;
-
-        iter++;
       	if((rank==0)) {
       	  std::cout<< std::setfill(' ') << std::setw(8);
       	  std::cout<< iter << "/" << maxiter << "        ";
       	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
       	}
 
+        r.transposeProduct(nr, r);
+        w *= (nr/gamma);
+        w += r;
+
+        iter++;
+
     } while ((sqrt(nr/nr0)>rtol) && (iter<maxiter));
 
     if(rank==0) {
       if(sqrt(nr/nr0)<rtol) {
-	  std::cout<<"Converged solution"<<std::endl;
+	  std::cout << "Converged solution with last residual = " << sqrt(nr) << std::endl;
       } else {
 	  std::cout<<"Not converged solution"<<std::endl;
       }
@@ -114,16 +115,17 @@ DummyDistributedVector ImprovedCG(
       r.axpy(-alpha, q);
 
 
-      r.transposeProduct(nr, r);
-      w *= (nr/gamma);
-      w +=r;
-
-      iter++;
-      if(debug && (rank==0) && (iter%10 == 0)) {
+      if(rank==0) {
         std::cout<< std::setfill(' ') << std::setw(8);
         std::cout<< iter << "/" << maxiter << "        ";
         std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
       }
+      
+      r.transposeProduct(nr, r);
+      w *= (nr/gamma);
+      w += r;
+
+      iter++;
 
   } while ((sqrt(nr/nr0)>rtol) && (iter<maxiter));
 
@@ -204,7 +206,7 @@ DummyDistributedVector ChronopoulosGearCG(
     r.axpy(-alpha, q);
     v.axpy(-alpha, z);
 
-    if((debug) && (rank==0) && (iter%100 == 0)) {
+    if(rank==0) {
       std::cout<< std::setfill(' ') << std::setw(8);
       std::cout<< iter << "/" << maxiter << "        ";
       std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;

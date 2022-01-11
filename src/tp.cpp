@@ -12,6 +12,7 @@
 #include "DistributedMatrix.hpp"
 #include "DistributedDiagonalMatrix.hpp"
 #include "DistributedBlockDiagonalMatrix.hpp"
+#include "DistributedBlockTridiagonalMatrix.hpp"
 #include "conjGrad.hpp"
 #include "utils.hpp"
 /**
@@ -135,18 +136,34 @@ int main (int argc, char *argv[])
     //A.print("diagonal");
     DistributedBlockDiagonalMatrix block_B(comm, (local_sz / block_size), block_size);
     DistributedBlockDiagonalMatrix* block_A = &block_B;
-    block_A->data.setLinSpaced(local_sz * 2, 1.0, (double) local_sz * 2);
-    block_A->makeDataSymetric();
-    /*int p = 0;
+    DistributedBlockTridiagonalMatrix triblock_B(comm, (local_sz / block_size), block_size);
+    DistributedBlockTridiagonalMatrix* triblock_A = &triblock_B;
+
+    block_A->data.setLinSpaced(local_sz * block_size, 1.0, (double) local_sz * 2);
+    triblock_A->data.setLinSpaced((local_sz / block_size) * block_size * block_size
+                            + 2 * (local_sz / block_size - 1) * block_size * block_size, 1.0,
+                            (local_sz / block_size) * block_size * block_size
+                            + 2 * (local_sz / block_size - 1) * block_size * block_size);
+    //block_A->makeDataSymetric();
+
+    /*
     for (int i = 0; i < block_A->m_nbblocks * block_A->m_blocksize * block_A->m_blocksize; ++i) {
         if (1 - ((i == 0) | (i==3) | (i==4) | (i==7) | (i==8) | (i==11) | (i==12) | (i==15))) {
-          block_A->data(i) = 0;
+          block_A->data(i) = 1;
+        }
+    }
+    int count = 1;
+    for (int i = 0; i < block_A->m_nbblocks * block_A->m_blocksize * block_A->m_blocksize; ++i) {
+        if ((i == 0) | (i==3) | (i==4) | (i==7) | (i==8) | (i==11) | (i==12) | (i==15)) {
+          block_A->data(i) = count;
+          count++;
         }
     }*/
 
 
     // A.data.array().pow(k);
     block_A->print("regular");
+    triblock_A->print("regular");
 
 
     DummyDistributedVector b(comm, local_sz);
@@ -163,9 +180,9 @@ int main (int argc, char *argv[])
     starttime = MPI_Wtime();
 
     for(int irep=0; irep<rep; irep++) {
-    	if(solverID == 0) x = CG(rank, block_A, b, rtol, maxiter);
-    	else if (solverID == 1) x = ImprovedCG(rank, block_A, b, rtol, maxiter);
-    	else if (solverID == 2) x = ChronopoulosGearCG(rank, block_A, b, rtol, maxiter);
+    	if(solverID == 0) x = CG(rank, A, b, rtol, maxiter);
+    	else if (solverID == 1) x = ImprovedCG(rank, A, b, rtol, maxiter);
+    	else if (solverID == 2) x = ChronopoulosGearCG(rank, A, b, rtol, maxiter);
     	else {
     	  printf("Unknown solver\n");
     	  return(1);
@@ -180,7 +197,11 @@ int main (int argc, char *argv[])
     tmp -= b;
     double nr;
     tmp.transposeProduct(nr, tmp);
-    if(rank==0) std::cout << "Real residual " << sqrt(nr) << std::endl;
+
+    if(rank==0) {
+      std::cout << "Real residual " << sqrt(nr) << std::endl;
+      tmp.print();
+    }
 
     // To print the solution
     // if(rank==0) std::cout << x.data << std::endl;
