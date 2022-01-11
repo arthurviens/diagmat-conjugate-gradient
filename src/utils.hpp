@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
@@ -7,6 +8,9 @@
 #include <vector>
 #include "Eigen/Dense"
 #include "Eigen/Core"
+
+#define MAXBUFSIZE  ((int) 1e6)
+
 
 namespace disp
 {

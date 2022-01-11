@@ -17,6 +17,28 @@ DistributedBlockTridiagonalMatrix::DistributedBlockTridiagonalMatrix(MPI_Comm& c
 }
 
 
+void DistributedBlockTridiagonalMatrix::initFromMatrix(Eigen::MatrixXd base) {
+    int blocksize_squared = m_blocksize * m_blocksize;
+    int nrows = base.rows();
+    int ncols = base.cols();
+    assert(nrows == ncols);
+    assert(m_blocksize * m_nbblocks_diag == nrows);
+
+    for (unsigned int i = 0; i < (m_nbblocks_diag); ++i) {
+      for (int t = -1; t < 2; ++t) {
+        if (((i != 0) | (t != -1)) & ((i != m_nbblocks_diag - 1) | (t != 1) )) {
+          for (unsigned int j = 0; j < m_blocksize; ++j) {
+            for (unsigned int k = 0; k < m_blocksize; ++k) {
+              data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k] =
+                  base(i * m_blocksize + j, i * m_blocksize + t * m_blocksize + k);
+            }
+          }
+        }
+      }
+    }
+}
+
+
 void DistributedBlockTridiagonalMatrix::inplaceProduct(DummyDistributedVector& other) const
 {
     other.data.cwiseProduct(data);
@@ -56,7 +78,7 @@ void DistributedBlockTridiagonalMatrix::print(std::string display_type) const {
 
   Eigen::MatrixXd toDisplay = plainMatrix();
 
-  Eigen::IOFormat CleanFmt(3, 0, ", ", "\n", "[", "]");
+  Eigen::IOFormat CleanFmt(1, 0, ", ", "\n", "[", "]");
 
   std::cout << "Block Matrix of size " << data.size() << std::endl;
   if (display_type == "diagonal") {
