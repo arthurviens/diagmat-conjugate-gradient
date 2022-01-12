@@ -25,3 +25,11 @@ DummyDistributedVector ChronopoulosGearCG(
     const DistributedDiagonalMatrix &A,
     const DummyDistributedVector &b,
     double rtol=1e-6, int maxiter=1000);
+
+DummyDistributedVector GhyselsVanrooseCG(
+    int rank,
+    const DistributedDiagonalMatrix &A,
+    const DistributedDiagonalMatrix &M,
+    const DummyDistributedVector &b,
+    double rtol, int maxiter
+    )
