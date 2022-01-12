@@ -25,3 +25,10 @@ DummyDistributedVector ChronopoulosGearCG(
     const DistributedMatrix *A,
     const DummyDistributedVector &b,
     double rtol=1e-6, int maxiter=1000);
+
+DummyDistributedVector Preconditionned_ChronopoulosGearCG(
+    int rank,
+    DistributedMatrix *A,
+    const DistributedDiagonalMatrix &M,
+    const DummyDistributedVector &b,
+    double rtol=1e-6, int maxiter=1000);

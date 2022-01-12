@@ -16,12 +16,8 @@
 #include "DistributedBlockTridiagonalMatrix.hpp"
 #include "conjGrad.hpp"
 #include "utils.hpp"
-/**
- * @todo write docs
- */
+
 extern bool debug;
-
-
 
 
 int main (int argc, char *argv[])
@@ -131,6 +127,9 @@ int main (int argc, char *argv[])
     }
 
     // Setup of the matrix and rhs
+    DistributedDiagonalMatrix M(comm, local_sz);
+    M.data.setLinSpaced(local_sz, 1.0, 1.0);
+
     DistributedDiagonalMatrix B(comm, local_sz);
     DistributedDiagonalMatrix* A = &B;
     (*A).data.setLinSpaced(local_sz, 1.0, (double) local_sz);
@@ -154,7 +153,6 @@ int main (int argc, char *argv[])
     triblock_A->initFromMatrix(Spmat);
 
     //block_A->makeDataSymetric();
-
 
 
     // A.data.array().pow(k);
@@ -190,6 +188,7 @@ int main (int argc, char *argv[])
     	if(solverID == 0) x = CG(rank, triblock_A, b, rtol, maxiter);
     	else if (solverID == 1) x = ImprovedCG(rank, triblock_A, b, rtol, maxiter);
     	else if (solverID == 2) x = ChronopoulosGearCG(rank, triblock_A, b, rtol, maxiter);
+      else if (solverID == 3) x = Preconditionned_ChronopoulosGearCG(rank, triblock_A, M, b, rtol, maxiter);
     	else {
     	  printf("Unknown solver\n");
     	  return(1);

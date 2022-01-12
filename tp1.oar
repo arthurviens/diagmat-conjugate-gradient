@@ -42,5 +42,6 @@ MPIRUN="$MPI_HOME/bin/mpirun -n $CORES -host $OAR_HOSTS $MPI_PARAM"
 $MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 0
 $MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 1
 $MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 2
+$MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 3
 
 echo "End computation"
