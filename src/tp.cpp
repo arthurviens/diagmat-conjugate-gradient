@@ -141,35 +141,17 @@ int main (int argc, char *argv[])
     DistributedBlockTridiagonalMatrix* triblock_A = &triblock_B;
 
     block_A->data.setLinSpaced(local_sz * block_size, 1.0, (double) local_sz * 2);
-    /*triblock_A->data.setLinSpaced((local_sz / block_size) * block_size * block_size
-                            + 2 * (local_sz / block_size - 1) * block_size * block_size, 1.0,
-                            (local_sz / block_size) * block_size * block_size
-                            + 2 * (local_sz / block_size - 1) * block_size * block_size);*/
 
     std::cout << "Beginning matrix reading" << std::endl;
     typedef Eigen::SparseMatrix<double, Eigen::RowMajor>SMatrixXf;
-    SMatrixXf MAT;
-    Eigen::loadMarket(MAT, "LF10.mtx");
-    Eigen::MatrixXd Dmat(MAT);
+    SMatrixXf Spmat;
+    Eigen::loadMarket(Spmat, "LF10.mtx");
+    Eigen::MatrixXd Readmat(Spmat);
 
     //std::cout << Dmat << std::endl;
     //std::cout << "Rows : " << Dmat.rows() << " and cols " << Dmat.cols() << std::endl;
-    triblock_A->initFromMatrix(Dmat);
-    //block_A->makeDataSymetric();
-
-    /*
-    for (int i = 0; i < block_A->m_nbblocks * block_A->m_blocksize * block_A->m_blocksize; ++i) {
-        if (1 - ((i == 0) | (i==3) | (i==4) | (i==7) | (i==8) | (i==11) | (i==12) | (i==15))) {
-          block_A->data(i) = 1;
-        }
-    }
-    int count = 1;
-    for (int i = 0; i < block_A->m_nbblocks * block_A->m_blocksize * block_A->m_blocksize; ++i) {
-        if ((i == 0) | (i==3) | (i==4) | (i==7) | (i==8) | (i==11) | (i==12) | (i==15)) {
-          block_A->data(i) = count;
-          count++;
-        }
-    }*/
+    triblock_A->initFromMatrix(Spmat);
+    block_A->makeDataSymetric();
 
 
     // A.data.array().pow(k);
@@ -178,10 +160,11 @@ int main (int argc, char *argv[])
 
 
     DummyDistributedVector b(comm, local_sz);
-    DummyDistributedVector c(b);
+    //DummyDistributedVector c(b);
 
     b.data.setOnes();
     // b.data.setRandom();
+
 
     DummyDistributedVector x(comm, local_sz);
 
@@ -189,6 +172,7 @@ int main (int argc, char *argv[])
 
     double starttime, endtime;
     starttime = MPI_Wtime();
+
 
     for(int irep=0; irep<rep; irep++) {
     	if(solverID == 0) x = CG(rank, triblock_A, b, rtol, maxiter);
@@ -203,15 +187,15 @@ int main (int argc, char *argv[])
     if(rank == 0) printf("That took %f seconds\n",endtime-starttime);
 
     // Just to check solution
-    DummyDistributedVector tmp(x);
-    A->product(tmp, x);
-    tmp -= b;
+    DummyDistributedVector r_tmp(b);
+    triblock_A->product(r_tmp, x);
+    r_tmp -= b;
     double nr;
-    tmp.transposeProduct(nr, tmp);
+    r_tmp.transposeProduct(nr, r_tmp);
 
     if(rank==0) {
       std::cout << "Real residual " << sqrt(nr) << std::endl;
-      tmp.print();
+      //r_tmp.print();
     }
 
     // To print the solution

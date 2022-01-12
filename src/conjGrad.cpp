@@ -20,7 +20,9 @@ DummyDistributedVector CG(
     //A.print();
     double alpha, gamma, delta;
     double nr, nr0;
+    //double ntest;
     DummyDistributedVector r(b);
+    DummyDistributedVector rtest(b);
     DummyDistributedVector x(b); x.data.setZero();
     DummyDistributedVector q(r); q.data.setZero();
     DummyDistributedVector w(r);
@@ -51,16 +53,21 @@ DummyDistributedVector CG(
         x.axpy(alpha, w);
         r.axpy(-alpha, q);
 
+        /*A->product(rtest, x);
+        rtest -= b;
+        rtest.transposeProduct(ntest, rtest);
+        std::cout << "Mon résidu : " << sqrt(ntest) << std::endl;*/
 
-      	if((rank==0)) {
-      	  std::cout<< std::setfill(' ') << std::setw(8);
-      	  std::cout<< iter << "/" << maxiter << "        ";
-      	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
-      	}
 
         r.transposeProduct(nr, r);
         w *= (nr/gamma);
         w += r;
+
+        if((rank==0)) {
+      	  std::cout<< std::setfill(' ') << std::setw(8);
+      	  std::cout<< iter << "/" << maxiter << "        ";
+      	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
+      	}
 
         iter++;
 
@@ -68,9 +75,9 @@ DummyDistributedVector CG(
 
     if(rank==0) {
       if(sqrt(nr/nr0)<rtol) {
-	  std::cout << "Converged solution with last residual = " << sqrt(nr) << std::endl;
+	       std::cout << "Converged solution with last residual = " << sqrt(nr) << std::endl;
       } else {
-	  std::cout<<"Not converged solution"<<std::endl;
+	       std::cout<<"Not converged solution"<<std::endl;
       }
     }
 
@@ -120,7 +127,7 @@ DummyDistributedVector ImprovedCG(
         std::cout<< iter << "/" << maxiter << "        ";
         std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
       }
-      
+
       r.transposeProduct(nr, r);
       w *= (nr/gamma);
       w += r;
