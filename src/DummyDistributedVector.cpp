@@ -118,3 +118,15 @@ void DummyDistributedVector::itransposeProduct(double& out, const DummyDistribut
   out = ltransposeProduct(other);
   MPI_Iallreduce(MPI_IN_PLACE, &out, 1, MPI_DOUBLE, MPI_SUM, *_comm, &req);
 }
+
+void DummyDistributedVector::print() const {
+  std::string sep = "\n----------------------------------------\n";
+
+  //Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", ", ", "", "", " << ", ";");
+  Eigen::IOFormat CleanFmt(3, 0, ", ", "\n", "[", "]");
+  //Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "]");
+  //Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
+
+  std::cout << "Matrix of size " << data.size() << std::endl;
+  std::cout << data.format(CleanFmt) << sep;
+}

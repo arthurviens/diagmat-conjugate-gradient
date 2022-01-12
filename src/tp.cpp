@@ -6,24 +6,36 @@
 #include <mpi.h>
 #include <vector>
 #include "Eigen/Dense"
+#include "Eigen/Core"
+#include "Eigen/StdVector"
+#include <unsupported/Eigen/SparseExtra>
 #include "DummyDistributedVector.hpp"
+#include "DistributedMatrix.hpp"
 #include "DistributedDiagonalMatrix.hpp"
+#include "DistributedBlockDiagonalMatrix.hpp"
+#include "DistributedBlockTridiagonalMatrix.hpp"
 #include "conjGrad.hpp"
+#include "utils.hpp"
 /**
  * @todo write docs
  */
 extern bool debug;
 
+
+
+
 int main (int argc, char *argv[])
 {
     int rank, comm_sz;
-    int local_sz = 10;
+    int local_sz = 18;
     int solverID = 0;
-    int maxiter = 1000;
+    int maxiter = 100;
     double rtol = 1.0e-6;
     int rep=1;
+    int block_size = 3;
 
-    /* Initialize MPI */
+    // Initialize MPI
+
     MPI_Init(&argc, &argv);
     MPI_Comm comm;
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);
@@ -37,7 +49,7 @@ int main (int argc, char *argv[])
        return(0);
     }
 
-    /* Parse command line */
+    // Parse command line
     {
        int arg_index = 0;
        int print_usage = 0;
@@ -118,24 +130,66 @@ int main (int argc, char *argv[])
        std::cout << "Solver id: " << solverID << std::endl;
     }
 
-
     // Setup of the matrix and rhs
-    DistributedDiagonalMatrix A(comm, local_sz);
-    A.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
+    DistributedDiagonalMatrix B(comm, local_sz);
+    DistributedDiagonalMatrix* A = &B;
+    (*A).data.setLinSpaced(local_sz, 1.0, (double) local_sz);
+    //A.print("diagonal");
+    DistributedBlockDiagonalMatrix block_B(comm, (local_sz / block_size), block_size);
+    DistributedBlockDiagonalMatrix* block_A = &block_B;
+    DistributedBlockTridiagonalMatrix triblock_B(comm, (local_sz / block_size), block_size);
+    DistributedBlockTridiagonalMatrix* triblock_A = &triblock_B;
+
+    block_A->data.setLinSpaced(local_sz * block_size, 1.0, (double) local_sz * 2);
+
+
+    std::cout << "Beginning matrix reading" << std::endl;
+    typedef Eigen::SparseMatrix<double, Eigen::RowMajor>SMatrixXf;
+    SMatrixXf Spmat;
+    Eigen::loadMarket(Spmat, "LF10.mtx");
+    Eigen::MatrixXd Readmat(Spmat);
+
+    //std::cout << Dmat << std::endl;
+    //std::cout << "Rows : " << Dmat.rows() << " and cols " << Dmat.cols() << std::endl;
+    triblock_A->initFromMatrix(Spmat);
+
+    //block_A->makeDataSymetric();
+
+
+
     // A.data.array().pow(k);
+    //block_A->print("regular");
+    triblock_A->print("regular");
+
+
     DummyDistributedVector b(comm, local_sz);
     b.data.setOnes();
+    /*
+    b.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
+
+
+    DummyDistributedVector c(b);
+
     // b.data.setRandom();
 
+    triblock_A->product(c, b);
+    b.print();
+    c.print();
+    return 0;*/
+
+
     DummyDistributedVector x(comm, local_sz);
+
+
 
     double starttime, endtime;
     starttime = MPI_Wtime();
 
+
     for(int irep=0; irep<rep; irep++) {
-    	if(solverID == 0) x = CG(rank, A, b, rtol, maxiter);
-    	else if (solverID == 1) x = ImprovedCG(rank, A, b, rtol, maxiter);
-    	else if (solverID == 2) x = ChronopoulosGearCG(rank, A, b, rtol, maxiter);
+    	if(solverID == 0) x = CG(rank, triblock_A, b, rtol, maxiter);
+    	else if (solverID == 1) x = ImprovedCG(rank, triblock_A, b, rtol, maxiter);
+    	else if (solverID == 2) x = ChronopoulosGearCG(rank, triblock_A, b, rtol, maxiter);
     	else {
     	  printf("Unknown solver\n");
     	  return(1);
@@ -145,17 +199,23 @@ int main (int argc, char *argv[])
     if(rank == 0) printf("That took %f seconds\n",endtime-starttime);
 
     // Just to check solution
-    DummyDistributedVector tmp(x);
-    A.product(tmp, x);
-    tmp -= b;
+    DummyDistributedVector r_tmp(b);
+    triblock_A->product(r_tmp, x);
+    r_tmp -= b;
     double nr;
-    tmp.transposeProduct(nr, tmp);
-    if(rank==0) std::cout << "Real residual " << sqrt(nr) << std::endl;
+    r_tmp.transposeProduct(nr, r_tmp);
+
+    if(rank==0) {
+      std::cout << "Real residual " << sqrt(nr) << std::endl;
+      //r_tmp.print();
+    }
 
     // To print the solution
     // if(rank==0) std::cout << x.data << std::endl;
 
     if(rank == 0) std::cout<<"Finish computation"<<std::endl;
+
     MPI_Finalize();
+
     return 0;
 }
