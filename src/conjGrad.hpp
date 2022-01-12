@@ -31,5 +31,4 @@ DummyDistributedVector GhyselsVanrooseCG(
     const DistributedDiagonalMatrix &A,
     const DistributedDiagonalMatrix &M,
     const DummyDistributedVector &b,
-    double rtol, int maxiter
-    )
+    double rtol, int maxiter);
