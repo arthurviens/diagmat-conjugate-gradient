@@ -11,22 +11,26 @@ bool debug = false;
 
 DummyDistributedVector CG(
     int rank,
-    const DistributedDiagonalMatrix &A,
+    const DistributedMatrix* A,
     const DummyDistributedVector &b,
     double rtol, int maxiter)
 {
     // Allocation
+    //std::cout << "Début CG, printing A" << std::endl;
+    //A.print();
     double alpha, gamma, delta;
     double nr, nr0;
+    //double ntest;
     DummyDistributedVector r(b);
+    DummyDistributedVector rtest(b);
     DummyDistributedVector x(b); x.data.setZero();
     DummyDistributedVector q(r); q.data.setZero();
+    DummyDistributedVector w(r);
 
     // Initialization
     int iter=0;
     r.transposeProduct(nr0, r); //
     nr = nr0;
-    DummyDistributedVector w(r);
     if(rank==0) {
       std::cout<<"Start CG"<<std::endl;
       std::cout<<"    Initial residual: "<< sqrt(nr0) <<std::endl;
@@ -35,37 +39,45 @@ DummyDistributedVector CG(
 
     // CG-Loop
     do {
-        A.product(q, w);
+        A->product(q, w);
+        //std::cout << "q = " << std::endl;
+        //q.print();
         r.transposeProduct(gamma, r);
         w.transposeProduct(delta, q);
         alpha = gamma/delta;
 
-	if(debug && rank==0) {
-	  std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
-	}
+      	if(debug && rank==0) {
+      	  std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
+      	}
 
         x.axpy(alpha, w);
         r.axpy(-alpha, q);
 
+        /*A->product(rtest, x);
+        rtest -= b;
+        rtest.transposeProduct(ntest, rtest);
+        std::cout << "Mon résidu : " << sqrt(ntest) << std::endl;*/
+
 
         r.transposeProduct(nr, r);
         w *= (nr/gamma);
-        w +=r;
+        w += r;
+
+        if((rank==0)) {
+      	  std::cout<< std::setfill(' ') << std::setw(8);
+      	  std::cout<< iter << "/" << maxiter << "        ";
+      	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
+      	}
 
         iter++;
-	if((rank==0) && (iter%10 == 0)) {
-	  std::cout<< std::setfill(' ') << std::setw(8);
-	  std::cout<< iter << "/" << maxiter << "        ";
-	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
-	}
 
     } while ((sqrt(nr/nr0)>rtol) && (iter<maxiter));
 
     if(rank==0) {
       if(sqrt(nr/nr0)<rtol) {
-	  std::cout<<"Converged solution"<<std::endl;
+	       std::cout << "Converged solution with last residual = " << sqrt(nr) << std::endl;
       } else {
-	  std::cout<<"Not converged solution"<<std::endl;
+	       std::cout<<"Not converged solution"<<std::endl;
       }
     }
 
@@ -74,7 +86,7 @@ DummyDistributedVector CG(
 
 DummyDistributedVector ImprovedCG(
   int rank,
-  const DistributedDiagonalMatrix &A,
+  const DistributedMatrix *A,
   const DummyDistributedVector &b,
   double rtol, int maxiter)
 {
@@ -98,28 +110,29 @@ DummyDistributedVector ImprovedCG(
 
   // CG-Loop
   do {
-      A.product(q, w);
+      A->product(q, w);
       r.doubleTransposeProduct(w, gamma, delta, r, q);
       alpha = gamma/delta;
 
-if(debug && rank==0) {
-  std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
-}
+      if(debug && rank==0) {
+        std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
+      }
 
       x.axpy(alpha, w);
       r.axpy(-alpha, q);
 
 
+      if(rank==0) {
+        std::cout<< std::setfill(' ') << std::setw(8);
+        std::cout<< iter << "/" << maxiter << "        ";
+        std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
+      }
+
       r.transposeProduct(nr, r);
       w *= (nr/gamma);
-      w +=r;
+      w += r;
 
       iter++;
-if(debug && (rank==0) && (iter%10 == 0)) {
-  std::cout<< std::setfill(' ') << std::setw(8);
-  std::cout<< iter << "/" << maxiter << "        ";
-  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
-}
 
   } while ((sqrt(nr/nr0)>rtol) && (iter<maxiter));
 
@@ -137,7 +150,7 @@ if(debug && (rank==0) && (iter%10 == 0)) {
 
 DummyDistributedVector ChronopoulosGearCG(
     int rank,
-    const DistributedDiagonalMatrix &A,
+    const DistributedMatrix *A,
     const DummyDistributedVector &b,
     double rtol, int maxiter)
 {
@@ -162,21 +175,21 @@ DummyDistributedVector ChronopoulosGearCG(
     std::cout<<"    Iteration,  Absolute residual,  Relative residual"<<std::endl;
   }
 
-  A.product(v, r);
+  A->product(v, r);
   MPI_Request req;
   MPI_Status status;
 
   // CG-Loop
   std::vector<double> values(2);
   do {
-    //A.product(q, w);
+    //A->product(q, w);
     values[0] = r.ltransposeProduct(r);
     values[1] = r.ltransposeProduct(v);
-    Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A._comm), req);
+    Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A->m_comm), req);
     gamma = values[0];
     delta = values[1];
 
-    A.product(u, v);
+    A->product(u, v);
 
     MPI_Wait(&req, &status);
 
@@ -200,7 +213,7 @@ DummyDistributedVector ChronopoulosGearCG(
     r.axpy(-alpha, q);
     v.axpy(-alpha, z);
 
-    if((debug) && (rank==0) && (iter%100 == 0)) {
+    if(rank==0) {
       std::cout<< std::setfill(' ') << std::setw(8);
       std::cout<< iter << "/" << maxiter << "        ";
       std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
@@ -226,7 +239,7 @@ DummyDistributedVector ChronopoulosGearCG(
 
 DummyDistributedVector Preconditionned_ChronopoulosGearCG(
     int rank,
-    const DistributedDiagonalMatrix &A,
+    DistributedMatrix* A,
     const DistributedDiagonalMatrix &M,
     const DummyDistributedVector &b,
     double rtol, int maxiter)
@@ -252,7 +265,7 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       r.transposeProduct(nr0, r);
       nr = nr0;
 
-      A.product(w,u); // w0 = A U0
+      A->product(w,u); // w0 = A U0
       alpha=r.ltransposeProduct(u)/w.ltransposeProduct(u); // alpha0:=(r0,u0)/(w0,u0)
       beta=0;
       gamma=r.ltransposeProduct(u); // gamma0 = (r0,u0)
@@ -282,7 +295,7 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       x.axpy(alpha, p);
       r.axpy(-alpha, s);
       M.product(u, r); // ui+1 = M^-1 ri+1
-      A.product(w,u); // ligne 9
+      A->product(w,u); // ligne 9
       gamma = r.ltransposeProduct(u); //ligne 10
       delta = w.ltransposeProduct(u); //ligne 11
       beta = gamma/prev_gamma; //logne 12
