@@ -64,6 +64,9 @@ Eigen::MatrixXd DistributedBlockTridiagonalMatrix::plainMatrix() const {
           for (unsigned int k = 0; k < m_blocksize; ++k) {
             fullMatrix(i * m_blocksize + j, i * m_blocksize + t * m_blocksize + k)
                 = data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k];
+            fullMatrix(i * m_blocksize + t * m_blocksize + k, i * m_blocksize + j)
+                = data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k];
+          
           }
         }
       }
