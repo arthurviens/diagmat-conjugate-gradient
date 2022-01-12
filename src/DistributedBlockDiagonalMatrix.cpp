@@ -24,9 +24,23 @@ void DistributedBlockDiagonalMatrix::inplaceProduct(DummyDistributedVector& othe
 
 void DistributedBlockDiagonalMatrix::product(DummyDistributedVector& out, const DummyDistributedVector & in) const
 {
-    Eigen::MatrixXd fullMatrix = plainMatrix();
+    int blocksize_squared = m_blocksize * m_blocksize;
+    double tmp;
 
-    out.data = fullMatrix * in.data;
+    for (unsigned int i = 0; i < (m_nbblocks); ++i) {
+      for (unsigned int j = 0; j < m_blocksize; ++j) {
+        tmp = 0;
+        for (unsigned int k = 0; k < m_blocksize; ++k) {
+          tmp += in.data[i * m_blocksize + k] * data[i * blocksize_squared + j * m_blocksize + k];
+          //std::cout << "Adding " << in.data[i * m_blocksize + k] << " * " << data[i * blocksize_squared + j * m_blocksize + k] << " to tmp" << std::endl;
+        }
+        out.data[m_blocksize * i + j] = tmp;
+        //std::cout << "Writing " << tmp << " in c[" << m_blocksize * i + j << "]" << std::endl;
+      }
+    }
+
+    //Eigen::MatrixXd fullMatrix = plainMatrix();
+    //out.data = fullMatrix * in.data;
 }
 
 
