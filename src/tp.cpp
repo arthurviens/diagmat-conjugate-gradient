@@ -29,7 +29,7 @@ int main (int argc, char *argv[])
     int rank, comm_sz;
     int local_sz = 18;
     int solverID = 0;
-    int maxiter = 1000;
+    int maxiter = 100;
     double rtol = 1.0e-6;
     int rep=1;
     int block_size = 3;
@@ -142,6 +142,7 @@ int main (int argc, char *argv[])
 
     block_A->data.setLinSpaced(local_sz * block_size, 1.0, (double) local_sz * 2);
 
+
     std::cout << "Beginning matrix reading" << std::endl;
     typedef Eigen::SparseMatrix<double, Eigen::RowMajor>SMatrixXf;
     SMatrixXf Spmat;
@@ -151,7 +152,9 @@ int main (int argc, char *argv[])
     //std::cout << Dmat << std::endl;
     //std::cout << "Rows : " << Dmat.rows() << " and cols " << Dmat.cols() << std::endl;
     triblock_A->initFromMatrix(Spmat);
-    block_A->makeDataSymetric();
+
+    //block_A->makeDataSymetric();
+
 
 
     // A.data.array().pow(k);
@@ -160,10 +163,19 @@ int main (int argc, char *argv[])
 
 
     DummyDistributedVector b(comm, local_sz);
-    //DummyDistributedVector c(b);
-
     b.data.setOnes();
+    /*
+    b.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
+
+
+    DummyDistributedVector c(b);
+
     // b.data.setRandom();
+
+    triblock_A->product(c, b);
+    b.print();
+    c.print();
+    return 0;*/
 
 
     DummyDistributedVector x(comm, local_sz);

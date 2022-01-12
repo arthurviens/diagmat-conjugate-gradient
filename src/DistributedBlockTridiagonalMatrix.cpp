@@ -18,6 +18,7 @@ DistributedBlockTridiagonalMatrix::DistributedBlockTridiagonalMatrix(MPI_Comm& c
 
 
 void DistributedBlockTridiagonalMatrix::initFromMatrix(Eigen::MatrixXd base) {
+    double f_value;
     int blocksize_squared = m_blocksize * m_blocksize;
     int nrows = base.rows();
     int ncols = base.cols();
@@ -29,8 +30,13 @@ void DistributedBlockTridiagonalMatrix::initFromMatrix(Eigen::MatrixXd base) {
         if (((i != 0) | (t != -1)) & ((i != m_nbblocks_diag - 1) | (t != 1) )) {
           for (unsigned int j = 0; j < m_blocksize; ++j) {
             for (unsigned int k = 0; k < m_blocksize; ++k) {
-              data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k] =
-                  base(i * m_blocksize + j, i * m_blocksize + t * m_blocksize + k);
+              f_value = base(i * m_blocksize + j, i * m_blocksize + t * m_blocksize + k);
+              if (f_value != 0) {
+                data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k] = f_value;
+              } else {
+                data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k] =
+                    base(i * m_blocksize + t * m_blocksize + k, i * m_blocksize + j);
+              }
             }
           }
         }
@@ -46,13 +52,32 @@ void DistributedBlockTridiagonalMatrix::inplaceProduct(DummyDistributedVector& o
 
 void DistributedBlockTridiagonalMatrix::product(DummyDistributedVector& out, const DummyDistributedVector & in) const
 {
-    Eigen::MatrixXd fullMatrix = plainMatrix();
+  int blocksize_squared = m_blocksize * m_blocksize;
+  double tmp;
 
-    out.data = fullMatrix * in.data;
+  for (unsigned int i = 0; i < (m_nbblocks_diag); ++i) {
+    for (unsigned int j = 0; j < m_blocksize; ++j) {
+      tmp = 0;
+      for (int t = -1; t < 2; ++t) {
+        if (((i != 0) | (t != -1)) & ((i != m_nbblocks_diag - 1) | (t != 1) )) {
+          for (unsigned int k = 0; k < m_blocksize; ++k) {
+            tmp += in.data[i * m_blocksize + t * m_blocksize + k]
+                  * data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k];
+            /*std::cout << "Adding " << in.data[i * m_blocksize + t * m_blocksize + k] << " * "
+              << data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k] << " (data["
+              << i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k << "] to tmp" << std::endl;*/
+          }
+        }
+      }
+      out.data[i * m_blocksize + j] = tmp;
+      //std::cout << "Writing " << tmp << " in c[" << m_blocksize * i + j << "]" << std::endl;
+    }
+  }
 }
 
 
 Eigen::MatrixXd DistributedBlockTridiagonalMatrix::plainMatrix() const {
+  double dat;
   int blocksize_squared = m_blocksize * m_blocksize;
 
   Eigen::MatrixXd fullMatrix(m_blocksize * m_nbblocks_diag, m_blocksize * m_nbblocks_diag);
@@ -62,11 +87,9 @@ Eigen::MatrixXd DistributedBlockTridiagonalMatrix::plainMatrix() const {
       if (((i != 0) | (t != -1)) & ((i != m_nbblocks_diag - 1) | (t != 1) )) {
         for (unsigned int j = 0; j < m_blocksize; ++j) {
           for (unsigned int k = 0; k < m_blocksize; ++k) {
-            fullMatrix(i * m_blocksize + j, i * m_blocksize + t * m_blocksize + k)
-                = data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k];
-            fullMatrix(i * m_blocksize + t * m_blocksize + k, i * m_blocksize + j)
-                = data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k];
-          
+            dat = data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k];
+            fullMatrix(i * m_blocksize + j, i * m_blocksize + t * m_blocksize + k) = dat;
+            fullMatrix(i * m_blocksize + t * m_blocksize + k, i * m_blocksize + j) = dat;
           }
         }
       }
