@@ -25,4 +25,5 @@ public:
     void print(std::string display_type) const override;
     Eigen::MatrixXd plainMatrix() const ;
     void makeDataSymetric();
+    DistributedDiagonalMatrix extractDiagonal() const;
 };

@@ -76,6 +76,22 @@ void DistributedBlockTridiagonalMatrix::product(DummyDistributedVector& out, con
 }
 
 
+
+DistributedDiagonalMatrix DistributedBlockTridiagonalMatrix::extractDiagonal() const {
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+    DistributedDiagonalMatrix D(comm, m_nbblocks_diag * m_blocksize);
+    int blocksize_squared = m_blocksize * m_blocksize;
+
+    for (unsigned int i = 0; i < (m_nbblocks_diag); ++i) {
+      for (unsigned int j = 0; j < m_blocksize; ++j) {
+          D.data[i * m_blocksize + j] = data[i * 3 * blocksize_squared + j * m_blocksize + j];
+      }
+    }
+    return D;
+}
+
+
 Eigen::MatrixXd DistributedBlockTridiagonalMatrix::plainMatrix() const {
   double dat;
   int blocksize_squared = m_blocksize * m_blocksize;
