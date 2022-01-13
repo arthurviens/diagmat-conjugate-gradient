@@ -59,7 +59,21 @@ Eigen::MatrixXd DistributedBlockDiagonalMatrix::plainMatrix() const {
   return fullMatrix;
 }
 
-// [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]
+
+DistributedDiagonalMatrix DistributedBlockDiagonalMatrix::extractDiagonal() const {
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+    DistributedDiagonalMatrix D(comm, m_nbblocks * m_blocksize);
+    int blocksize_squared = m_blocksize * m_blocksize;
+
+    for (unsigned int i = 0; i < (m_nbblocks); ++i) {
+      for (unsigned int j = 0; j < m_blocksize; ++j) {
+          D.data[i * m_blocksize + j] = data[i * blocksize_squared + j * m_blocksize + j];
+      }
+    }
+    return D;
+}
+
 
 void DistributedBlockDiagonalMatrix::makeDataSymetric() {
   int blocksize_squared = m_blocksize * m_blocksize;

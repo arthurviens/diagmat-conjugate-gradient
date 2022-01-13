@@ -35,3 +35,9 @@ void DistributedDiagonalMatrix::print(std::string display_type) const {
     std::cout << data << sep;
   }
 }
+
+void DistributedDiagonalMatrix::inv() {
+  for (int i = 0; i < m_local_sz; ++i) {
+    data(i) = 1 / data(i);
+  }
+}

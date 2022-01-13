@@ -172,8 +172,8 @@ int main (int argc, char *argv[])
 
     triblock_A->product(c, b);
     b.print();
-    c.print();
-    return 0;*/
+    c.print();*/
+    return 0;
 
 
     DummyDistributedVector x(comm, local_sz);
