@@ -157,23 +157,22 @@ int main (int argc, char *argv[])
 
     // A.data.array().pow(k);
     //block_A->print("regular");
-    triblock_A->print("regular");
+    //triblock_A->print("regular");
 
 
     DummyDistributedVector b(comm, local_sz);
-    b.data.setOnes();
+    //b.data.setOnes();
+    b.data.setRandom();
     /*
     b.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
 
 
     DummyDistributedVector c(b);
 
-    // b.data.setRandom();
 
     triblock_A->product(c, b);
     b.print();
     c.print();*/
-    return 0;
 
 
     DummyDistributedVector x(comm, local_sz);
