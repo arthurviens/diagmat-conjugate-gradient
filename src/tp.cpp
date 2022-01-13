@@ -17,6 +17,7 @@
 #include "conjGrad.hpp"
 #include "utils.hpp"
 
+
 extern bool debug;
 
 
@@ -25,7 +26,7 @@ int main (int argc, char *argv[])
     int rank, comm_sz;
     int local_sz = 18;
     int solverID = 0;
-    int maxiter = 100;
+    int maxiter = 500;
     double rtol = 1.0e-6;
     int rep=1;
     int block_size = 3;
@@ -106,6 +107,7 @@ int main (int argc, char *argv[])
           printf("                        0 - CG (default)\n");
           printf("                        1 - ImprovedCG\n");
           printf("                        2 - Chronopoulos Gear-CG\n");
+          printf("                        3 - GhyselsVanroose - CG\n");
           printf("\n");
        }
 
@@ -188,6 +190,7 @@ int main (int argc, char *argv[])
     	else if (solverID == 1) x = ImprovedCG(rank, triblock_A, b, rtol, maxiter);
     	else if (solverID == 2) x = ChronopoulosGearCG(rank, triblock_A, b, rtol, maxiter);
       else if (solverID == 3) x = Preconditionned_ChronopoulosGearCG(rank, triblock_A, M, b, rtol, maxiter);
+      else if (solverID == 4) x = GhyselsVanrooseCG(rank, A, M, b, rtol, maxiter);
     	else {
     	  printf("Unknown solver\n");
     	  return(1);

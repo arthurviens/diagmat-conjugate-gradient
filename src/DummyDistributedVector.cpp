@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include <iomanip>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
@@ -120,13 +121,14 @@ void DummyDistributedVector::itransposeProduct(double& out, const DummyDistribut
 }
 
 void DummyDistributedVector::print() const {
-  std::string sep = "\n----------------------------------------\n";
-
-  //Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", ", ", "", "", " << ", ";");
-  Eigen::IOFormat CleanFmt(3, 0, ", ", "\n", "[", "]");
-  //Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "]");
-  //Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
-
-  std::cout << "Matrix of size " << data.size() << std::endl;
-  std::cout << data.format(CleanFmt) << sep;
+  std::cout << "Vec = [";
+  for (int i = 0; i < data.size(); ++i) {
+    if (i < data.size() - 1) {
+      std::cout << data[i] << std::setprecision(2) << " | ";
+    }
+    else {
+      std::cout << data[i] << std::setprecision(2);
+    }
+  }
+  std::cout << "]" << std::endl;
 }

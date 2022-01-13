@@ -165,6 +165,8 @@ DummyDistributedVector ChronopoulosGearCG(
   DummyDistributedVector z(r); z.data.setZero();
   DummyDistributedVector w(r); w.data.setZero();
   // Initialization
+
+
   int iter=0;
   r.transposeProduct(nr0, r);
   nr = nr0;
@@ -243,7 +245,6 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
     const DistributedDiagonalMatrix &M,
     const DummyDistributedVector &b,
     double rtol, int maxiter)
-
     {
       // Allocation
       double alpha, beta, gamma, delta, prev_gamma;
@@ -284,12 +285,6 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
         std::vector<double> values(2);
       do {
 
-        //values[0] = r.ltransposeProduct(r);
-        //values[1] = r.ltransposeProduct(v);
-        //Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A._comm), req);
-        //gamma = values[0];
-        //delta = values[1];
-
       p *= beta; p += u;
       s *= beta; s += w;
       x.axpy(alpha, p);
@@ -323,6 +318,103 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       std::cout<<"Not converged solution"<<std::endl;
         }
       }
-
       return x;
-      }
+}
+
+
+
+DummyDistributedVector GhyselsVanrooseCG(
+    int rank,
+    DistributedMatrix *A,
+    const DistributedDiagonalMatrix &M,
+    const DummyDistributedVector &b,
+    double rtol, int maxiter
+    )
+    {
+    // Allocation
+    double alpha, gamma, delta, beta, prev_gamma;
+    DummyDistributedVector r(b);
+    DummyDistributedVector x(b); x.data.setZero();
+    DummyDistributedVector q(r); q.data.setZero();
+    DummyDistributedVector n(r); n.data.setZero();
+    DummyDistributedVector u(r); u.data.setZero();
+    DummyDistributedVector z(r); z.data.setZero();
+    DummyDistributedVector w(r); w.data.setZero();
+    DummyDistributedVector p(r); p.data.setZero();
+    DummyDistributedVector s(r); s.data.setZero();
+    DummyDistributedVector m(r); m.data.setZero();
+
+    // Initialization
+    alpha = 0; prev_gamma = 0; // Silence warnings
+    double nr, nr0;
+    int iter=0;
+    r.transposeProduct(nr0, r);
+    nr = nr0;
+    M.product(u, r);
+    A->product(w,u);
+
+    if(rank==0) {
+       std::cout<<"Start Preconditionned Chronopoulos CG"<<std::endl;
+       std::cout<<"Initial residual: "<< sqrt(nr0) <<std::endl;
+       std::cout<<"Iteration,  Absolute residual,  Relative residual"<<std::endl;
+    }
+
+    MPI_Request req;
+    MPI_Status status;
+
+    std::vector < double > values(2);
+    do {
+        values[0] = r.ltransposeProduct(u);
+        values[1] = w.ltransposeProduct(u);
+        Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, ( *A->m_comm), req);
+        gamma = values[0];
+        delta = values[1];
+
+        M.product(m, w);
+        A->product(n, m);
+
+        MPI_Wait( & req, & status);
+
+        if (iter > 0) {
+            beta = gamma / prev_gamma;
+            alpha = gamma / (delta - beta * gamma / alpha );
+        } else {
+            beta = 0;
+            alpha = gamma / delta;
+        }
+
+        z *= beta; z += n;
+        q *= beta; q += m;
+        s *= beta; s += w;
+        p *= beta; p += u;
+        x.axpy(alpha, p);
+        r.axpy(-alpha, s);
+        u.axpy(-alpha, q);
+        w.axpy(-alpha, z);
+
+        prev_gamma = gamma;
+
+
+        if ((rank == 0)) {
+          std::cout << std::setfill(' ') << std::setw(8);
+          std::cout << iter << "/" << maxiter << "        ";
+          std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr / nr0) << std::endl;
+        }
+
+
+        r.transposeProduct(nr, r);
+        iter++;
+
+      } while((sqrt(nr/nr0)>rtol) && (iter<maxiter));
+
+        if(rank==0) {
+            if( sqrt(nr/nr0) < rtol)
+            {
+            std::cout<<"Converged solution"<<std::endl;
+            }
+            else {
+            std::cout<<"Not converged solution"<<std::endl;
+            }
+        }
+        return x;
+}
