@@ -26,7 +26,7 @@ int main (int argc, char *argv[])
     int rank, comm_sz;
     int local_sz = 18;
     int solverID = 0;
-    int maxiter = 100;
+    int maxiter = 500;
     double rtol = 1.0e-6;
     int rep=1;
     int block_size = 3;
@@ -173,7 +173,6 @@ int main (int argc, char *argv[])
     DummyDistributedVector c(b);
 
     // b.data.setRandom();
->>>>>>> master
 
     triblock_A->product(c, b);
     b.print();
