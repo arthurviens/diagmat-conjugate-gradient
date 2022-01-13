@@ -37,14 +37,7 @@ DummyDistributedVector GhyselsVanrooseCG(
     r.transposeProduct(nr0, r);
     nr = nr0;
     M.product(u, r);
-    if (debug) {
-      std::cout << "Initialisation : u = "; u.print();
-    }
     A.product(w,u);
-
-    if (debug) {
-      std::cout << "Initialisation : w = "; w.print();
-    }
 
     if(rank==0) {
        std::cout<<"Start Preconditionned Chronopoulos CG"<<std::endl;
@@ -57,59 +50,32 @@ DummyDistributedVector GhyselsVanrooseCG(
 
     std::vector < double > values(2);
     do {
-        std::cout << "iter " << iter << std::endl;
-        std::cout << "r " << r.data << std::endl;
-        std::cout << "u " << u.data << std::endl;
         values[0] = r.ltransposeProduct(u);
         values[1] = w.ltransposeProduct(u);
         Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, ( * A._comm), req);
         gamma = values[0];
         delta = values[1];
 
-
-
         M.product(m, w);
-        std::cout << "iter = " << iter << " on a m = "; m.print();
         A.product(n, m);
 
         MPI_Wait( & req, & status);
 
-        if (debug) {
-          std::cout << "Gamma " << gamma << " | Delta " << delta << std::endl;
-        }
         if (iter > 0) {
             beta = gamma / prev_gamma;
-            /*std::cout << "Dividing " << gamma << " by " << prev_gamma
-            << " gives " << beta << std::endl;
-            std::cout << "Dividing " << gamma << " by " << (delta - beta * gamma / alpha )
-            << " gives " << gamma / (delta - beta * gamma / alpha ) << std::endl;
-            std::cout << "Delta " << delta << std::endl;
-            std::cout << "Beta " << beta << std::endl;
-            std::cout << "Gamma " << gamma << std::endl;
-            std::cout << "Alpha " << alpha << std::endl;*/
             alpha = gamma / (delta - beta * gamma / alpha );
-            //std::cout << "juste after " << alpha << std::endl;
         } else {
-            //std::cout << "iter = 0 and gamma " << gamma << " and delta "<< delta << std::endl;
             beta = 0;
             alpha = gamma / delta;
         }
 
         z *= beta; z += n;
-        std::cout << "WE HAVE beta = " << beta << " axpy m = "; m.print();
-        std::cout << "BEFORE q = "; q.print();
         q *= beta; q += m;
-        std::cout << "AFTER q = "; q.print();
         s *= beta; s += w;
         p *= beta; p += u;
         x.axpy(alpha, p);
-        if (debug) {
-          std::cout << "-alpha " << -alpha << std::endl;
-        }
         r.axpy(-alpha, s);
-        std::cout << "before u "; u.print();
         u.axpy(-alpha, q);
-        std::cout << "after u "; u.print();
         w.axpy(-alpha, z);
 
         prev_gamma = gamma;
