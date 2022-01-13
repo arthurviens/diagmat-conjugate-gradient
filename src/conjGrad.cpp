@@ -8,7 +8,7 @@
 #include "conjGrad.hpp"
 
 
-bool debug = false;
+bool debug = true;
 
 DummyDistributedVector GhyselsVanrooseCG(
     int rank,
@@ -24,7 +24,6 @@ DummyDistributedVector GhyselsVanrooseCG(
     DummyDistributedVector x(b); x.data.setZero();
     DummyDistributedVector q(r); q.data.setZero();
     DummyDistributedVector n(r); n.data.setZero();
-    DummyDistributedVector v(r); v.data.setZero();
     DummyDistributedVector u(r); u.data.setZero();
     DummyDistributedVector z(r); z.data.setZero();
     DummyDistributedVector w(r); w.data.setZero();
@@ -35,23 +34,24 @@ DummyDistributedVector GhyselsVanrooseCG(
     // Initialization
     double nr, nr0;
     int iter=0;
-    nr = nr0;
     M.product(u, r);   
     r.transposeProduct(nr0, r);
     A.product(w,u);
-    MPI_Request req;
-    MPI_Status status;
-
+    nr = nr0;
     if(rank==0) {
        std::cout<<"Start Preconditionned Chronopoulos CG"<<std::endl;
        std::cout<<"Initial residual: "<< sqrt(nr0) <<std::endl;
        std::cout<<"Iteration,  Absolute residual,  Relative residual"<<std::endl;
     }
     
+    MPI_Request req;
+    MPI_Status status;
+    
     do {
         gamma = r.ltransposeProduct(u);
+        prev_gamma = gamma;
         delta = w.ltransposeProduct(u);
-        M.product(u, w);
+        M.product(m, w);
         A.product(n,m);
         if (iter > 0) {
             beta = gamma / prev_gamma;
@@ -63,20 +63,29 @@ DummyDistributedVector GhyselsVanrooseCG(
         
         z *= beta; z += n;
         q *= beta; q += m;
-        p *= beta; p += u;
         s *= beta; s += w;
+        p *= beta; p += u;
         x.axpy(alpha, p);
         r.axpy(-alpha, s);
         u.axpy(-alpha, q);
         w.axpy(-alpha, z);
         iter++;
+        
+        r.transposeProduct(nr, r);
+        
+        if ((rank == 0)) {
+          std::cout << std::setfill(' ') << std::setw(8);
+          std::cout << iter << "/" << maxiter << "        ";
+          std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr / nr0) << std::endl;
+        }
+
+        
 
       } while((sqrt(nr/nr0)>rtol) && (iter<maxiter));
       
         if(rank==0) {
             if( sqrt(nr/nr0) < rtol)
             {
-
             std::cout<<"Converged solution"<<std::endl;
             }
             else {
@@ -84,7 +93,7 @@ DummyDistributedVector GhyselsVanrooseCG(
             }
         }
         return x;
-  } 
+        } 
  
 
 

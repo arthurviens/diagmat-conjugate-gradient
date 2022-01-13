@@ -9,9 +9,8 @@
 #include "DummyDistributedVector.hpp"
 #include "DistributedDiagonalMatrix.hpp"
 #include "conjGrad.hpp"
-/**
- * @todo write docs
- */
+
+
 extern bool debug;
 
 int main (int argc, char *argv[])
@@ -139,7 +138,7 @@ int main (int argc, char *argv[])
     	if(solverID == 0) x = CG(rank, A, b, rtol, maxiter);
     	else if (solverID == 1) x = ImprovedCG(rank, A, b, rtol, maxiter);
     	else if (solverID == 2) x = ChronopoulosGearCG(rank, A, b, rtol, maxiter);
-      else if (solverID == 3) x = GhyselsVanrooseCG(rank, A, b, rtol, maxiter);
+      else if (solverID == 3) x = GhyselsVanrooseCG(rank, A, M, b, rtol, maxiter);
     	else {
     	  printf("Unknown solver\n");
     	  return(1);
