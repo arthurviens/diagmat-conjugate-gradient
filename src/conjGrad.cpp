@@ -296,8 +296,15 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       r.axpy(-alpha, s);
       M.product(u, r); // ui+1 = M^-1 ri+1
       A->product(w,u); // ligne 9
-      gamma = r.ltransposeProduct(u); //ligne 10
-      delta = w.ltransposeProduct(u); //ligne 11
+
+      values[0] = r.ltransposeProduct(u);
+      values[1] = w.ltransposeProduct(u);
+      Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A->m_comm), req);
+      gamma = values[0];
+      delta = values[1];
+
+      MPI_Wait(&req, &status);
+
       beta = gamma/prev_gamma; //logne 12
       prev_gamma = gamma;
       alpha = gamma /( delta - beta * gamma / alpha);
