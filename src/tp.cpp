@@ -126,8 +126,8 @@ int main (int argc, char *argv[])
     M.data.setLinSpaced(local_sz, 1.0, (double) 1.0);
     // A.data.array().pow(k);
     DummyDistributedVector b(comm, local_sz);
-    b.data.setOnes();
-    // b.data.setRandom();
+    //b.data.setOnes();
+    b.data.setRandom();
 
     DummyDistributedVector x(comm, local_sz);
 

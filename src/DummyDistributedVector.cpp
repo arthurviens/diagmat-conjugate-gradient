@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include <iomanip>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
@@ -117,4 +118,18 @@ void DummyDistributedVector::itransposeProduct(double& out, const DummyDistribut
 {
   out = ltransposeProduct(other);
   MPI_Iallreduce(MPI_IN_PLACE, &out, 1, MPI_DOUBLE, MPI_SUM, *_comm, &req);
+}
+
+
+void DummyDistributedVector::print() {
+  std::cout << "Vec = [";
+  for (int i = 0; i < data.size(); ++i) {
+    if (i < data.size() - 1) {
+      std::cout << data[i] << std::setprecision(2) << " | ";
+    }
+    else {
+      std::cout << data[i] << std::setprecision(2);
+    }
+  }
+  std::cout << "]" << std::endl;
 }
