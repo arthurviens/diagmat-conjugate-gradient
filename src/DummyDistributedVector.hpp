@@ -41,5 +41,5 @@ public:
     void doubleTransposeProduct(DummyDistributedVector& second_ref, double& out1, double& out2, const DummyDistributedVector& other1, const DummyDistributedVector& other2);
     void IdoubleTransposeProduct(DummyDistributedVector& second_ref, double& out1, double& out2, const DummyDistributedVector& other1, const DummyDistributedVector& other2, MPI_Request& req);
     void itransposeProduct(double& out, const DummyDistributedVector& other, MPI_Request& req);
-    void print();
+    void print() const;
 };
