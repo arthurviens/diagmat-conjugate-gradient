@@ -104,3 +104,22 @@ void DistributedBlockDiagonalMatrix::print(std::string display_type) const {
     std::cout << toDisplay.format(CleanFmt) << sep;
   }
 }
+
+void DistributedBlockDiagonalMatrix::inv() {
+  int blocksize_squared = m_blocksize * m_blocksize;
+  Eigen::MatrixXd bloc(m_blocksize, m_blocksize);
+  Eigen::MatrixXd inverse(m_blocksize, m_blocksize);
+  for (unsigned int i = 0; i < (m_nbblocks); ++i) { // For each block
+    for (unsigned int j = 0; j < m_blocksize; ++j) {
+      for (unsigned int k = 0; k < m_blocksize; ++k) {
+        bloc(j, k) = data[i * blocksize_squared + j * m_blocksize + k];
+      }
+    }
+    inverse = bloc.inverse();
+    for (unsigned int j = 0; j < m_blocksize; ++j) {
+      for (unsigned int k = 0; k < m_blocksize; ++k) {
+        data[i * blocksize_squared + j * m_blocksize + k] = inverse(j, k);
+      }
+    }
+  }
+}
