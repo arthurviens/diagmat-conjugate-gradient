@@ -39,9 +39,11 @@ OAR_HOSTS=$(echo $HOSTS | sed "s/ /,/g");
 MPIRUN="$MPI_HOME/bin/mpirun -n $CORES -host $OAR_HOSTS $MPI_PARAM"
 
 #$MPI_HOME/bin/mpirun -n $CORES -host $OAR_HOSTS $MPI_PARAM tp.out -r $REP -sz $LOCAL_SZ -solver 0
-$MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 0
-$MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 1
-$MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 2
-$MPIRUN tp.out -r $REP -sz $LOCAL_SZ -solver 3
-
+### $MPIRUN -np ${n} tp.out -r $REP -solver 2
+for n in 1 2 4
+do
+  mpirun -np ${n} tp.out -r $REP -solver 2 > ./logs/np${n}_rep${rep}_solver${solver}.log
+  mpirun -np ${n} tp.out -r $REP -solver 3 > ./logs/np${n}_rep${rep}_solver${solver}.log
+  mpirun -np ${n} tp.out -r $REP -solver 4 > ./logs/np${n}_rep${rep}_solver${solver}.log 
+done
 echo "End computation"

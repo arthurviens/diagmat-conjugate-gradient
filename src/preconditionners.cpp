@@ -27,7 +27,7 @@ DistributedDiagonalMatrix SSOR(MatrixXd A, double omega) {
     MPI_Comm_dup(MPI_COMM_WORLD, &comm);
 
     DistributedDiagonalMatrix Mdiag(comm, Mdiag_vec.size());
-    
+
     Mdiag.data = Mdiag_vec;
     return Mdiag;
 }

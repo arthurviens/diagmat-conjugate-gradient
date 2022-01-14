@@ -63,7 +63,7 @@ DummyDistributedVector CG(
         w *= (nr/gamma);
         w += r;
 
-        if((rank==0)) {
+        if(debug && (rank==0)) {
       	  std::cout<< std::setfill(' ') << std::setw(8);
       	  std::cout<< iter << "/" << maxiter << "        ";
       	  std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
@@ -79,6 +79,9 @@ DummyDistributedVector CG(
       } else {
 	       std::cout<<"Not converged solution"<<std::endl;
       }
+    }
+    if (rank == 0) {
+      std::cout << "Number of iterations : " << iter << std::endl;
     }
 
     return x;
@@ -122,7 +125,7 @@ DummyDistributedVector ImprovedCG(
       r.axpy(-alpha, q);
 
 
-      if(rank==0) {
+      if(debug && (rank==0)) {
         std::cout<< std::setfill(' ') << std::setw(8);
         std::cout<< iter << "/" << maxiter << "        ";
         std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
@@ -142,6 +145,9 @@ DummyDistributedVector ImprovedCG(
     } else {
   std::cout<<"Not converged solution"<<std::endl;
     }
+  }
+  if (rank == 0) {
+    std::cout << "Number of iterations : " << iter << std::endl;
   }
 
   return x;
@@ -203,7 +209,7 @@ DummyDistributedVector ChronopoulosGearCG(
       alpha = gamma / delta;
     }
 
-    if(debug && rank==0) {
+    if(debug && (rank==0)) {
       std::cout<<"gamma, delta: "<< gamma << ", " << delta << std::endl;
     }
 
@@ -215,7 +221,7 @@ DummyDistributedVector ChronopoulosGearCG(
     r.axpy(-alpha, q);
     v.axpy(-alpha, z);
 
-    if(rank==0) {
+    if(debug && (rank==0)) {
       std::cout<< std::setfill(' ') << std::setw(8);
       std::cout<< iter << "/" << maxiter << "        ";
       std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
@@ -235,6 +241,9 @@ DummyDistributedVector ChronopoulosGearCG(
   std::cout<<"Not converged solution"<<std::endl;
     }
   }
+  if (rank == 0) {
+    std::cout << "Number of iterations : " << iter << std::endl;
+  }
 
   return x;
 }
@@ -242,7 +251,7 @@ DummyDistributedVector ChronopoulosGearCG(
 DummyDistributedVector Preconditionned_ChronopoulosGearCG(
     int rank,
     DistributedMatrix* A,
-    const DistributedDiagonalMatrix &M,
+    const DistributedMatrix* M,
     const DummyDistributedVector &b,
     double rtol, int maxiter)
     {
@@ -262,7 +271,7 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
 
       // Initialization
       int iter=0;
-      M.product(u, r); //u0=M^(-1) r0
+      M->product(u, r); //u0=M^(-1) r0
       r.transposeProduct(nr0, r);
       nr = nr0;
 
@@ -289,7 +298,7 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       s *= beta; s += w;
       x.axpy(alpha, p);
       r.axpy(-alpha, s);
-      M.product(u, r); // ui+1 = M^-1 ri+1
+      M->product(u, r); // ui+1 = M^-1 ri+1
       A->product(w,u); // ligne 9
 
       values[0] = r.ltransposeProduct(u);
@@ -307,7 +316,7 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       r.transposeProduct(nr, r);
       iter++;
 
-      if(rank==0) {
+      if(debug && (rank==0)) {
         std::cout<< std::setfill(' ') << std::setw(8);
         std::cout<< iter << "/" << maxiter << "        ";
         std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
@@ -323,6 +332,9 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       std::cout<<"Not converged solution"<<std::endl;
         }
       }
+      if (rank == 0) {
+        std::cout << "Number of iterations : " << iter << std::endl;
+      }
       return x;
 }
 
@@ -331,7 +343,7 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
 DummyDistributedVector GhyselsVanrooseCG(
     int rank,
     DistributedMatrix *A,
-    const DistributedDiagonalMatrix &M,
+    const DistributedMatrix* M,
     const DummyDistributedVector &b,
     double rtol, int maxiter
     )
@@ -355,7 +367,7 @@ DummyDistributedVector GhyselsVanrooseCG(
     int iter=0;
     r.transposeProduct(nr0, r);
     nr = nr0;
-    M.product(u, r);
+    M->product(u, r);
     A->product(w,u);
 
     if(rank==0) {
@@ -375,7 +387,7 @@ DummyDistributedVector GhyselsVanrooseCG(
         gamma = values[0];
         delta = values[1];
 
-        M.product(m, w);
+        M->product(m, w);
         A->product(n, m);
 
         MPI_Wait( & req, & status);
@@ -400,7 +412,7 @@ DummyDistributedVector GhyselsVanrooseCG(
         prev_gamma = gamma;
 
 
-        if ((rank == 0)) {
+        if (debug && (rank==0)) {
           std::cout << std::setfill(' ') << std::setw(8);
           std::cout << iter << "/" << maxiter << "        ";
           std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr / nr0) << std::endl;
@@ -421,5 +433,9 @@ DummyDistributedVector GhyselsVanrooseCG(
             std::cout<<"Not converged solution"<<std::endl;
             }
         }
+        if (rank == 0) {
+          std::cout << "Number of iterations : " << iter << std::endl;
+        }
+
         return x;
 }

@@ -27,7 +27,7 @@ int main (int argc, char *argv[])
     int rank, comm_sz;
     int local_sz = 100;
     int solverID = 0;
-    int maxiter = 500;
+    int maxiter = 1000;
     double rtol = 1.0e-6;
     int rep=1;
     int block_size = 10;
@@ -161,13 +161,15 @@ int main (int argc, char *argv[])
         //block_A->print("regular");
         triblock_A->print("regular");
     }*/
+    DistributedBlockDiagonalMatrix Mb(comm, local_sz/block_size, block_size);
+    DistributedBlockDiagonalMatrix *M = &Mb;
+    Mb = triblock_A->extractBlockDiagonal();
 
     //DistributedDiagonalMatrix M = triblock_A->extractDiagonal();
-
-    DistributedDiagonalMatrix M = SSOR(Readmat, 1);
+    //DistributedDiagonalMatrix M = SSOR(Readmat, 1);
     //DistributedDiagonalMatrix M(comm, local_sz);//= SSOR(Readmat, 1);
     //M.data.setOnes();
-    M.inv();
+    M->inv();
 
     DummyDistributedVector b(comm, local_sz);
     b.data.setOnes();
