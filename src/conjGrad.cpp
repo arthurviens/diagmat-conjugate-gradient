@@ -307,6 +307,11 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       r.transposeProduct(nr, r);
       iter++;
 
+      if(rank==0) {
+        std::cout<< std::setfill(' ') << std::setw(8);
+        std::cout<< iter << "/" << maxiter << "        ";
+        std::cout << std::scientific << sqrt(nr) << "        " << sqrt(nr/nr0) << std::endl;
+      }
 
 
       } while((sqrt(nr/nr0)>rtol) && (iter<maxiter));

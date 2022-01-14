@@ -22,7 +22,7 @@ public:
     DistributedBlockTridiagonalMatrix(MPI_Comm& comm,  int nb_blocks, int block_size);
     void inplaceProduct(DummyDistributedVector& other) const override;
     void product(DummyDistributedVector& out, const DummyDistributedVector & in) const override;
-    Eigen::MatrixXd plainMatrix() const;
+    Eigen::MatrixXd plainMatrix() const override;
     void print(std::string display_type) const;
     void initFromMatrix(Eigen::MatrixXd);
     DistributedDiagonalMatrix extractDiagonal() const;
