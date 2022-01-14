@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "Eigen/Dense"
 #include "DistributedMatrix.hpp"
+#include "DistributedBlockDiagonalMatrix.hpp"
 #include "DistributedBlockTridiagonalMatrix.hpp"
 #include "DummyDistributedVector.hpp"
 
@@ -92,6 +93,23 @@ DistributedDiagonalMatrix DistributedBlockTridiagonalMatrix::extractDiagonal() c
 }
 
 
+DistributedBlockDiagonalMatrix DistributedBlockTridiagonalMatrix::extractBlockDiagonal() const {
+    MPI_Comm comm;
+    MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+    DistributedBlockDiagonalMatrix D(comm, m_nbblocks_diag, m_blocksize);
+    int blocksize_squared = m_blocksize * m_blocksize;
+
+    for (unsigned int i = 0; i < (m_nbblocks_diag); ++i) {
+      for (unsigned int j = 0; j < m_blocksize; ++j) {
+          for (unsigned int k = 0; k < m_blocksize; ++k) {
+          D.data[i * blocksize_squared + j * m_blocksize + k] = data[i * 3 * blocksize_squared + j * m_blocksize + k];
+        }
+      }
+    }
+    return D;
+}
+
+
 Eigen::MatrixXd DistributedBlockTridiagonalMatrix::plainMatrix() const {
   double dat;
   int blocksize_squared = m_blocksize * m_blocksize;
@@ -105,7 +123,7 @@ Eigen::MatrixXd DistributedBlockTridiagonalMatrix::plainMatrix() const {
           for (unsigned int k = 0; k < m_blocksize; ++k) {
             dat = data[i * 3 * blocksize_squared + t * blocksize_squared + j * m_blocksize + k];
             fullMatrix(i * m_blocksize + j, i * m_blocksize + t * m_blocksize + k) = dat;
-            fullMatrix(i * m_blocksize + t * m_blocksize + k, i * m_blocksize + j) = dat;
+            //fullMatrix(i * m_blocksize + t * m_blocksize + k, i * m_blocksize + j) = dat;
           }
         }
       }
@@ -120,7 +138,7 @@ void DistributedBlockTridiagonalMatrix::print(std::string display_type) const {
 
   Eigen::MatrixXd toDisplay = plainMatrix();
 
-  Eigen::IOFormat CleanFmt(1, 0, ", ", "\n", "[", "]");
+  Eigen::IOFormat CleanFmt(2, 0, ", ", "\n", "[", "]");
 
   std::cout << "Block Matrix of size " << data.size() << std::endl;
   if (display_type == "diagonal") {

@@ -7,6 +7,7 @@
 #include "DummyDistributedVector.hpp"
 #include "DistributedMatrix.hpp"
 #include "DistributedDiagonalMatrix.hpp"
+#include "DistributedBlockDiagonalMatrix.hpp"
 
 
 // This function is used to simulate a big network latency in order to be able to
@@ -25,4 +26,5 @@ public:
     void print(std::string display_type) const;
     void initFromMatrix(Eigen::MatrixXd);
     DistributedDiagonalMatrix extractDiagonal() const;
+    DistributedBlockDiagonalMatrix extractBlockDiagonal() const;
 };
