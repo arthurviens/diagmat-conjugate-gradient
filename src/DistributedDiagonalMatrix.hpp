@@ -16,4 +16,5 @@ public:
     void product(DummyDistributedVector& out, const DummyDistributedVector & in) const override;
     void print(std::string display_type) const override;
     void inv();
+    Eigen::MatrixXd plainMatrix() const override;
 };

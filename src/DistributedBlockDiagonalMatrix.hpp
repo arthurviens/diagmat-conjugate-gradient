@@ -23,7 +23,7 @@ public:
     void inplaceProduct(DummyDistributedVector& other) const override;
     void product(DummyDistributedVector& out, const DummyDistributedVector & in) const override;
     void print(std::string display_type) const override;
-    Eigen::MatrixXd plainMatrix() const ;
+    Eigen::MatrixXd plainMatrix() const override;
     void makeDataSymetric();
     DistributedDiagonalMatrix extractDiagonal() const;
     void inv();

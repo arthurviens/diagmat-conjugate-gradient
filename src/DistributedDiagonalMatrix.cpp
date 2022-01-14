@@ -23,6 +23,17 @@ void DistributedDiagonalMatrix::product(DummyDistributedVector& out, const Dummy
     out.data = data.asDiagonal() * in.data;
 }
 
+Eigen::MatrixXd DistributedDiagonalMatrix::plainMatrix() const {
+
+  Eigen::MatrixXd fullMatrix(m_local_sz, m_local_sz);
+  fullMatrix.setZero();
+  for (unsigned int i = 0; i < m_local_sz; ++i) {
+    fullMatrix(i, i) = data[i];
+  }
+  return fullMatrix;
+}
+
+
 void DistributedDiagonalMatrix::print(std::string display_type) const {
   std::string sep = "\n----------------------------------------\n";
 

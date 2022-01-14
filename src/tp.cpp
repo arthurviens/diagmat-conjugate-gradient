@@ -16,6 +16,7 @@
 #include "DistributedBlockTridiagonalMatrix.hpp"
 #include "conjGrad.hpp"
 #include "utils.hpp"
+#include "preconditionners.hpp"
 
 
 extern bool debug;
@@ -24,12 +25,12 @@ extern bool debug;
 int main (int argc, char *argv[])
 {
     int rank, comm_sz;
-    int local_sz = 18;
+    int local_sz = 100;
     int solverID = 0;
     int maxiter = 500;
     double rtol = 1.0e-6;
     int rep=1;
-    int block_size = 3;
+    int block_size = 10;
 
     // Initialize MPI
 
@@ -129,8 +130,6 @@ int main (int argc, char *argv[])
     }
 
     // Setup of the matrix and rhs
-    DistributedDiagonalMatrix M(comm, local_sz);
-    M.data.setLinSpaced(local_sz, 1.0, 1.0);
 
     DistributedDiagonalMatrix B(comm, local_sz);
     DistributedDiagonalMatrix* A = &B;
@@ -147,7 +146,7 @@ int main (int argc, char *argv[])
     std::cout << "Beginning matrix reading" << std::endl;
     typedef Eigen::SparseMatrix<double, Eigen::RowMajor>SMatrixXf;
     SMatrixXf Spmat;
-    Eigen::loadMarket(Spmat, "LF10.mtx");
+    Eigen::loadMarket(Spmat, "nos4.mtx");
     Eigen::MatrixXd Readmat(Spmat);
 
     //std::cout << Dmat << std::endl;
@@ -158,13 +157,21 @@ int main (int argc, char *argv[])
 
 
     // A.data.array().pow(k);
-    //block_A->print("regular");
-    //triblock_A->print("regular");
+    /*if (rank == 0) {
+        //block_A->print("regular");
+        triblock_A->print("regular");
+    }*/
 
+    //DistributedDiagonalMatrix M = triblock_A->extractDiagonal();
+
+    DistributedDiagonalMatrix M = SSOR(Readmat, 1);
+    //DistributedDiagonalMatrix M(comm, local_sz);//= SSOR(Readmat, 1);
+    //M.data.setOnes();
+    M.inv();
 
     DummyDistributedVector b(comm, local_sz);
-    //b.data.setOnes();
-    b.data.setRandom();
+    b.data.setOnes();
+    //b.data.setRandom();
     /*
     b.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
 
