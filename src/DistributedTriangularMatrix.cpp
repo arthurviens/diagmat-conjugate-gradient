@@ -73,6 +73,7 @@ void DistributedTriangularMatrix::print(std::string display_type) const {
 }
 
 void DistributedTriangularMatrix::inv() {
+  std::cout << "Im her triangular" << std::endl;
   Eigen::MatrixXd fullMatrix = plainMatrix();
   Eigen::MatrixXd inverse = fullMatrix.inverse();
   initFromMatrix(inverse);

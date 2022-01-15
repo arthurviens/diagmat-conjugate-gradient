@@ -26,5 +26,5 @@ public:
     Eigen::MatrixXd plainMatrix() const override;
     void makeDataSymetric();
     DistributedDiagonalMatrix extractDiagonal() const;
-    void inv();
+    void inv() override;
 };

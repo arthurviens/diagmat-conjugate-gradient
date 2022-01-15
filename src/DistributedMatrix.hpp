@@ -28,4 +28,5 @@ public:
       const DummyDistributedVector & in) const = 0;
     virtual void print(std::string display_type) const = 0;
     virtual Eigen::MatrixXd plainMatrix() const = 0;
+    virtual void inv() = 0;
 };

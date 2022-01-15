@@ -28,8 +28,10 @@ int main (int argc, char *argv[])
     int rank, comm_sz;
     int local_sz = 100;
     int solverID = 0;
+    int precondID = 0;
     int maxiter = 1000;
     double rtol = 1.0e-6;
+    double omega = 1;
     int rep=1;
     int block_size = 10;
 
@@ -65,6 +67,11 @@ int main (int argc, char *argv[])
              arg_index++;
              solverID = atoi(argv[arg_index++]);
           }
+          else if ( strcmp(argv[arg_index], "-precond") == 0 )
+          {
+             arg_index++;
+             precondID = atoi(argv[arg_index++]);
+          }
           else if ( strcmp(argv[arg_index], "-maxiter") == 0 )
           {
              arg_index++;
@@ -74,6 +81,11 @@ int main (int argc, char *argv[])
           {
              arg_index++;
              rtol = atof(argv[arg_index++]);
+          }
+          else if ( strcmp(argv[arg_index], "-omega") == 0 )
+          {
+             arg_index++;
+             omega = atof(argv[arg_index++]);
           }
           else if ( strcmp(argv[arg_index], "-r") == 0 )
           {
@@ -105,11 +117,17 @@ int main (int argc, char *argv[])
           printf("  -maxiter <n>         : maximum number of iteration (default: %d)\n", 1000);
           printf("  -rep     <n>         : number of repetitions (default: %d)\n", 1);
           printf("  -rtol    <f>         : relative tolerance (default: %f)\n", 1.0e-6);
+          printf("  -omega    <f>        : omega of SSOR precond (default: %f)\n", 1.0);
+          printf("  -precond <ID>        : preconditionner ID\n");
+          printf("                        0 - Jacobi : Diagonal \n");
+          printf("                        1 - Jacobi : Block Diagonal \n");
+          printf("                        2 - SSOR \n");
           printf("  -solver <ID>         : solver ID\n");
           printf("                        0 - CG (default)\n");
           printf("                        1 - ImprovedCG\n");
           printf("                        2 - Chronopoulos Gear-CG\n");
-          printf("                        3 - GhyselsVanroose - CG\n");
+          printf("                        3 - Preconditionned Chronopoulos Gear - CG\n");
+          printf("                        4 - GhyselsVanroose - CG\n");
           printf("\n");
        }
 
@@ -130,21 +148,14 @@ int main (int argc, char *argv[])
        std::cout << "Solver id: " << solverID << std::endl;
     }
 
-    // Setup of the matrix and rhs
 
-    DistributedDiagonalMatrix B(comm, local_sz);
-    DistributedDiagonalMatrix* A = &B;
-    (*A).data.setLinSpaced(local_sz, 1.0, (double) local_sz);
-    //A.print("diagonal");
-    DistributedBlockDiagonalMatrix block_B(comm, (local_sz / block_size), block_size);
-    DistributedBlockDiagonalMatrix* block_A = &block_B;
     DistributedBlockTridiagonalMatrix triblock_B(comm, (local_sz / block_size), block_size);
     DistributedBlockTridiagonalMatrix* triblock_A = &triblock_B;
 
-    block_A->data.setLinSpaced(local_sz * block_size, 1.0, (double) local_sz * 2);
 
-
-    std::cout << "Beginning matrix reading" << std::endl;
+    if (rank == 0) {
+      std::cout << "Beginning matrix reading" << std::endl;
+    }
     typedef Eigen::SparseMatrix<double, Eigen::RowMajor>SMatrixXf;
     SMatrixXf Spmat;
     Eigen::loadMarket(Spmat, "nos4.mtx");
@@ -154,6 +165,9 @@ int main (int argc, char *argv[])
     //std::cout << "Rows : " << Dmat.rows() << " and cols " << Dmat.cols() << std::endl;
     triblock_A->initFromMatrix(Spmat);
 
+    if (rank == 0) {
+      std::cout << "Matrix finished reading" << std::endl;
+    }
     //block_A->makeDataSymetric();
 
 
@@ -162,14 +176,55 @@ int main (int argc, char *argv[])
         //block_A->print("regular");
         triblock_A->print("regular");
     }*/
+
+    DistributedMatrix *M;
+    /*if (precondID == 0) {
+      std::cout << "Jacobi preconditionning" << std::endl;
+      DistributedDiagonalMatrix Mb(comm, local_sz);
+      Mb = Jacobi(Readmat);
+      M = &Mb;
+    } else if (precondID == 1) {
+      std::cout << "Block Jacobi preconditionning" << std::endl;
+      DistributedBlockDiagonalMatrix Mb(comm, local_sz/block_size, block_size);
+      Mb = triblock_A->extractBlockDiagonal();
+      M = &Mb;
+    } else if (precondID == 2) {
+      std::cout << "SSOR preconditionning" << std::endl;
+      DistributedDiagonalMatrix Mb(comm, local_sz);
+      Mb = SSOR(Readmat, 1);
+      M = &Mb;
+    } else {*/
     DistributedBlockDiagonalMatrix Mb(comm, local_sz/block_size, block_size);
-    DistributedBlockDiagonalMatrix *M = &Mb;
     Mb = triblock_A->extractBlockDiagonal();
+    DistributedDiagonalMatrix Mb2(comm, local_sz);
+    Mb2 = Jacobi(Readmat);
+    DistributedDiagonalMatrix Mb3(comm, local_sz);
+    Mb3 = SSOR(Readmat, omega);
+    if (precondID == 0) {
+      if (rank == 0) {
+        std::cout << "Jacobi preconditionner" << std::endl;
+      }
+      M = &Mb2;
+    } else if (precondID == 1) {
+      if (rank == 0) {
+        std::cout << "Block Jacobi preconditionner" << std::endl;
+      }
+      M = &Mb;
+    } else {
+      if (rank == 0) {
+        std::cout << "SSOR preconditionner" << std::endl;
+      }
+      M = &Mb3;
+    }
+
+    //}
 
     //DistributedDiagonalMatrix M = triblock_A->extractDiagonal();
     //DistributedDiagonalMatrix M = SSOR(Readmat, 1);
     //DistributedDiagonalMatrix M(comm, local_sz);//= SSOR(Readmat, 1);
     //M.data.setOnes();
+
+
     M->inv();
 
     DummyDistributedVector b(comm, local_sz);
@@ -194,13 +249,16 @@ int main (int argc, char *argv[])
     double starttime, endtime;
     starttime = MPI_Wtime();
 
+    if (rank == 0) {
+      std::cout << "Beginning computation " << std::endl;
+    }
 
     for(int irep=0; irep<rep; irep++) {
     	if(solverID == 0) x = CG(rank, triblock_A, b, rtol, maxiter);
     	else if (solverID == 1) x = ImprovedCG(rank, triblock_A, b, rtol, maxiter);
     	else if (solverID == 2) x = ChronopoulosGearCG(rank, triblock_A, b, rtol, maxiter);
       else if (solverID == 3) x = Preconditionned_ChronopoulosGearCG(rank, triblock_A, M, b, rtol, maxiter);
-      else if (solverID == 4) x = GhyselsVanrooseCG(rank, A, M, b, rtol, maxiter);
+      else if (solverID == 4) x = GhyselsVanrooseCG(rank, triblock_A, M, b, rtol, maxiter);
     	else {
     	  printf("Unknown solver\n");
     	  return(1);
