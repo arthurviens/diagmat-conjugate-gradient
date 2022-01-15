@@ -29,13 +29,13 @@ DummyDistributedVector ChronopoulosGearCG(
 DummyDistributedVector Preconditionned_ChronopoulosGearCG(
     int rank,
     DistributedMatrix *A,
-    const DistributedDiagonalMatrix &M,
+    const DistributedMatrix *M,
     const DummyDistributedVector &b,
     double rtol=1e-6, int maxiter=1000);
 
 DummyDistributedVector GhyselsVanrooseCG(
     int rank,
     DistributedMatrix *A,
-    const DistributedDiagonalMatrix &M,
+    const DistributedMatrix *M,
     const DummyDistributedVector &b,
     double rtol, int maxiter);
