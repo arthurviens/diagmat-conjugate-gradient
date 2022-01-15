@@ -11,4 +11,6 @@
 #include "DummyDistributedVector.hpp"
 
 
+DistributedDiagonalMatrix Jacobi(Eigen::MatrixXd A);
+
 DistributedDiagonalMatrix SSOR(Eigen::MatrixXd A, double omega);

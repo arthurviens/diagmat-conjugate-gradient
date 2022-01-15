@@ -14,6 +14,18 @@
 using namespace Eigen;
 
 
+DistributedDiagonalMatrix Jacobi(MatrixXd A) {
+  VectorXd D = A.diagonal();
+
+  MPI_Comm comm;
+  MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+
+  DistributedDiagonalMatrix Mdiag(comm, D.size());
+  Mdiag.data = D;
+  return Mdiag;
+}
+
+
 DistributedDiagonalMatrix SSOR(MatrixXd A, double omega) {
     MatrixXd E = A.triangularView<Lower>();
 
