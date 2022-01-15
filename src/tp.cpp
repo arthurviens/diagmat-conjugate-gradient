@@ -12,6 +12,7 @@
 #include "DummyDistributedVector.hpp"
 #include "DistributedMatrix.hpp"
 #include "DistributedDiagonalMatrix.hpp"
+#include "DistributedTriangularMatrix.hpp"
 #include "DistributedBlockDiagonalMatrix.hpp"
 #include "DistributedBlockTridiagonalMatrix.hpp"
 #include "conjGrad.hpp"
