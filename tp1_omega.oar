@@ -40,11 +40,11 @@ do
     #$MPI_HOME/bin/mpirun -n $CORES -host $OAR_HOSTS $MPI_PARAM tp.out -r $REP -sz $LOCAL_SZ -solver 0
     ### $MPIRUN -np ${n} tp.out -r $REP -solver 2
 
-    $MPIRUN ./tp.out -r $REP -solver 2 > ./logs/np${CORES}_rep${REP}_solver2.log
-    for m in 0 1 2
+
+    for omega in 0.1 0.3 0.5 0.7 0.9 1.0 1.1 1.3 1.5 1.7 1.9
     do
-      $MPIRUN ./tp.out -r $REP -solver 3 -precond ${m} > ./logs/np${CORES}_rep${REP}_solver3_m${m}.log
-      $MPIRUN ./tp.out -r $REP -solver 4 -precond ${m} > ./logs/np${CORES}_rep${REP}_solver4_m${m}.log
+      $MPIRUN ./tp.out -r $REP -solver 3 -precond ${m} -omega ${omega} > ./logs_ssor/np${CORES}_rep${REP}_solver3_m2_omega${omega}.log
+      $MPIRUN ./tp.out -r $REP -solver 4 -precond ${m} -omega ${omega} > ./logs_ssor/np${CORES}_rep${REP}_solver4_m2_omega${omega}.log
     done
 done
 echo "End computation"

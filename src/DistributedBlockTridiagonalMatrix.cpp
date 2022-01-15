@@ -147,3 +147,8 @@ void DistributedBlockTridiagonalMatrix::print(std::string display_type) const {
     std::cout << toDisplay.format(CleanFmt) << sep;
   }
 }
+
+void DistributedBlockTridiagonalMatrix::inv() {
+  int i = 0;
+  ++i;
+}

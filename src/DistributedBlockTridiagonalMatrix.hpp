@@ -27,4 +27,5 @@ public:
     void initFromMatrix(Eigen::MatrixXd);
     DistributedDiagonalMatrix extractDiagonal() const;
     DistributedBlockDiagonalMatrix extractBlockDiagonal() const;
+    void inv() override;
 };

@@ -31,7 +31,7 @@ DummyDistributedVector CG(
     int iter=0;
     r.transposeProduct(nr0, r); //
     nr = nr0;
-    if(rank==0) {
+    if((rank==0) && debug) {
       std::cout<<"Start CG"<<std::endl;
       std::cout<<"    Initial residual: "<< sqrt(nr0) <<std::endl;
       std::cout<<"    Iteration,  Absolute residual,  Relative residual"<<std::endl;
@@ -73,7 +73,7 @@ DummyDistributedVector CG(
 
     } while ((sqrt(nr/nr0)>rtol) && (iter<maxiter));
 
-    if(rank==0) {
+    if((rank==0)) {
       if(sqrt(nr/nr0)<rtol) {
 	       std::cout << "Converged solution with last residual = " << sqrt(nr) << std::endl;
       } else {
@@ -105,7 +105,7 @@ DummyDistributedVector ImprovedCG(
   r.transposeProduct(nr0, r);
   nr = nr0;
   DummyDistributedVector w(r);
-  if(rank==0) {
+  if((rank==0) && debug) {
     std::cout<<"Start ImprovedCG"<<std::endl;
     std::cout<<"    Initial residual: "<< sqrt(nr0) <<std::endl;
     std::cout<<"    Iteration,  Absolute residual,  Relative residual"<<std::endl;
@@ -177,7 +177,7 @@ DummyDistributedVector ChronopoulosGearCG(
   r.transposeProduct(nr0, r);
   nr = nr0;
 
-  if(rank==0) {
+  if((rank==0) && debug) {
     std::cout<<"Start Chronopoulos CG"<<std::endl;
     std::cout<<"    Initial residual: "<< sqrt(nr0) <<std::endl;
     std::cout<<"    Iteration,  Absolute residual,  Relative residual"<<std::endl;
@@ -280,7 +280,7 @@ DummyDistributedVector Preconditionned_ChronopoulosGearCG(
       beta=0;
       gamma=r.ltransposeProduct(u); // gamma0 = (r0,u0)
       prev_gamma = gamma;
-      if(rank==0) {
+      if((rank==0) && debug) {
         std::cout<<"Start Preconditionned Chronopoulos CG"<<std::endl;
         std::cout<<"    Initial residual: "<< sqrt(nr0) <<std::endl;
         std::cout<<"    Iteration,  Absolute residual,  Relative residual"<<std::endl;
@@ -370,7 +370,7 @@ DummyDistributedVector GhyselsVanrooseCG(
     M->product(u, r);
     A->product(w,u);
 
-    if(rank==0) {
+    if((rank==0) && debug) {
        std::cout<<"Start Preconditionned Chronopoulos CG"<<std::endl;
        std::cout<<"Initial residual: "<< sqrt(nr0) <<std::endl;
        std::cout<<"Iteration,  Absolute residual,  Relative residual"<<std::endl;
