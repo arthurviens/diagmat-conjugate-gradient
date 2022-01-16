@@ -159,41 +159,16 @@ int main (int argc, char *argv[])
     typedef Eigen::SparseMatrix<double, Eigen::RowMajor>SMatrixXf;
     SMatrixXf Spmat;
     Eigen::loadMarket(Spmat, "nos4.mtx");
-    Eigen::MatrixXd Readmat(Spmat);
+    Eigen::MatrixXd Readmat(Spmat); // Read matrix in dense format
 
-    //std::cout << Dmat << std::endl;
-    //std::cout << "Rows : " << Dmat.rows() << " and cols " << Dmat.cols() << std::endl;
     triblock_A->initFromMatrix(Spmat);
 
     if (rank == 0) {
       std::cout << "Matrix finished reading" << std::endl;
     }
-    //block_A->makeDataSymetric();
-
-
-    // A.data.array().pow(k);
-    /*if (rank == 0) {
-        //block_A->print("regular");
-        triblock_A->print("regular");
-    }*/
 
     DistributedMatrix *M;
-    /*if (precondID == 0) {
-      std::cout << "Jacobi preconditionning" << std::endl;
-      DistributedDiagonalMatrix Mb(comm, local_sz);
-      Mb = Jacobi(Readmat);
-      M = &Mb;
-    } else if (precondID == 1) {
-      std::cout << "Block Jacobi preconditionning" << std::endl;
-      DistributedBlockDiagonalMatrix Mb(comm, local_sz/block_size, block_size);
-      Mb = triblock_A->extractBlockDiagonal();
-      M = &Mb;
-    } else if (precondID == 2) {
-      std::cout << "SSOR preconditionning" << std::endl;
-      DistributedDiagonalMatrix Mb(comm, local_sz);
-      Mb = SSOR(Readmat, 1);
-      M = &Mb;
-    } else {*/
+
     DistributedBlockDiagonalMatrix Mb(comm, local_sz/block_size, block_size);
     Mb = triblock_A->extractBlockDiagonal();
     DistributedDiagonalMatrix Mb2(comm, local_sz);
@@ -217,29 +192,14 @@ int main (int argc, char *argv[])
       M = &Mb3;
     }
 
-    //}
-
-    //DistributedDiagonalMatrix M = triblock_A->extractDiagonal();
-    //DistributedDiagonalMatrix M = SSOR(Readmat, 1);
-    //DistributedDiagonalMatrix M(comm, local_sz);//= SSOR(Readmat, 1);
-    //M.data.setOnes();
 
 
     M->inv();
 
     DummyDistributedVector b(comm, local_sz);
-    b.data.setOnes();
-    //b.data.setRandom();
-    /*
-    b.data.setLinSpaced(local_sz, 1.0, (double) local_sz);
-
-
-    DummyDistributedVector c(b);
-
-
-    triblock_A->product(c, b);
-    b.print();
-    c.print();*/
+    //b.data.setOnes();
+    b.data.setRandom();
+    
 
 
     DummyDistributedVector x(comm, local_sz);

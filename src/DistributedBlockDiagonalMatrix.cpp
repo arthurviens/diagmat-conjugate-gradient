@@ -38,9 +38,6 @@ void DistributedBlockDiagonalMatrix::product(DummyDistributedVector& out, const 
         //std::cout << "Writing " << tmp << " in c[" << m_blocksize * i + j << "]" << std::endl;
       }
     }
-
-    //Eigen::MatrixXd fullMatrix = plainMatrix();
-    //out.data = fullMatrix * in.data;
 }
 
 
