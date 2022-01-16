@@ -4,4 +4,4 @@ Pour compiler, exécutez la commande : <br/>
 ``` make ```
 
 Pour exécuter le programme : <br/>
-``` ./tp ```
+``` mpirun -np <n> ./tp.out -solver <solver> -precond <precondID> -omega <omega> ```
