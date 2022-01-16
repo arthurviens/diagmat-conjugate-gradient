@@ -16,8 +16,6 @@ DummyDistributedVector CG(
     double rtol, int maxiter)
 {
     // Allocation
-    //std::cout << "Début CG, printing A" << std::endl;
-    //A.print();
     double alpha, gamma, delta;
     double nr, nr0;
     //double ntest;
@@ -40,8 +38,6 @@ DummyDistributedVector CG(
     // CG-Loop
     do {
         A->product(q, w);
-        //std::cout << "q = " << std::endl;
-        //q.print();
         r.transposeProduct(gamma, r);
         w.transposeProduct(delta, q);
         alpha = gamma/delta;
@@ -53,10 +49,6 @@ DummyDistributedVector CG(
         x.axpy(alpha, w);
         r.axpy(-alpha, q);
 
-        /*A->product(rtest, x);
-        rtest -= b;
-        rtest.transposeProduct(ntest, rtest);
-        std::cout << "Mon résidu : " << sqrt(ntest) << std::endl;*/
 
 
         r.transposeProduct(nr, r);
@@ -190,7 +182,6 @@ DummyDistributedVector ChronopoulosGearCG(
   // CG-Loop
   std::vector<double> values(2);
   do {
-    //A->product(q, w);
     values[0] = r.ltransposeProduct(r);
     values[1] = r.ltransposeProduct(v);
     Dummy_MPI_Iallreduce(MPI_IN_PLACE, values.data(), 2, MPI_DOUBLE, MPI_SUM, (*A->m_comm), req);
