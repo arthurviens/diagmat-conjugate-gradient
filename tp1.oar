@@ -2,11 +2,11 @@
 
 ### nombre de cores et duree max du job
 ##OAR -l core=8
-#OAR -l core=20, walltime=00:30:00
+#OAR -l core=60, walltime=01:00:00
 
 ### nodes reserve pour le TP
 ##OAR -p host='n-in27' or host='n_in28' or host='n-in29' or host='n-in30' or host='n-in31' or host='n-in35' or host='n-in36' or host='n-in37' or host='n-in39' or host='n-in40'
-#OAR -p host='n-in10'
+#OAR -p host='n-in10' or host='n-in11' or host='n-in12'
 
 ### exemple  par oar
 ### usage1 : oarsub -S ./tp1.oar
@@ -28,7 +28,7 @@ echo "Start computation"
 date
 # Get the number of MPI tasks
 CORES=$(cat $OAR_NODE_FILE | wc -l)
-for CORES in 1 2 4 8 12 16 20
+for CORES in 1 2 4 8 12 16 20 32 48 60
 do
     echo "Execution on $CORES cores"
 
