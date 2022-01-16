@@ -17,7 +17,7 @@ void Dummy_MPI_Allreduce(const void *sendbuf, void* recvbuf, int count, MPI_Data
 {
     int comm_sz;
     MPI_Comm_size(comm, &comm_sz);
-    std::this_thread::sleep_for (std::chrono::microseconds(25*comm_sz));
+    //std::this_thread::sleep_for (std::chrono::microseconds(25*comm_sz));
     MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
 }
 
@@ -25,7 +25,7 @@ void Dummy_MPI_Iallreduce(const void *sendbuf, void* recvbuf, int count, MPI_Dat
 {
     int comm_sz;
     MPI_Comm_size(comm, &comm_sz);
-    std::this_thread::sleep_for (std::chrono::microseconds(25*comm_sz));
+    //std::this_thread::sleep_for (std::chrono::microseconds(25*comm_sz));
     MPI_Iallreduce(sendbuf, recvbuf, count, datatype, op, comm, &req);
 }
 

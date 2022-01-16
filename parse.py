@@ -5,7 +5,7 @@ import re
 
 columns = ["nbcores", "rep", "solver", "preconditionner", "time"]
 
-ssor = True
+ssor = False
 
 
 def parse_file(logs_dir, filename):
@@ -60,7 +60,7 @@ def parse_file_ssor(logs_dir, filename, columns):
 
 
 if __name__ == "__main__":
-    logs_dir = "logs_ssor/"
+    logs_dir = "logs/"
     files = os.listdir(logs_dir)
     df = pd.DataFrame()
     for file in files:
